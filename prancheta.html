@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual da Prancheta · Cavalaria SD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="prancheta">
+<div class="sheet">
+<main>
+
+  <section class="hero">
+    <span class="kicker">Cavalaria do Condado</span>
+    <h2>Manual da Prancheta</h2>
+    <p class="lead">O Livro da Cavalaria de Denver RP: como consultar, registrar, prender e multar sem deixar nada fora dos autos.</p>
+    <span data-ornament></span>
+  </section>
+
+  <nav class="toc" aria-label="Índice">
+    <strong>Índice</strong>
+    <ol>
+      <li><a href="#funciona">Como a prancheta funciona</a></li>
+      <li><a href="#capa">Primeiros passos: a Capa</a></li>
+      <li><a href="#ocorrencia">Registrar uma ocorrência</a></li>
+      <li><a href="#penas">Prender e multar</a></li>
+      <li><a href="#codigo">Como o Código calcula a pena</a></li>
+      <li><a href="#abas">As outras abas</a></li>
+    </ol>
+  </nav>
+
+  <h3 class="section" id="funciona"><span class="num">1</span>Como a prancheta funciona</h3>
+  <p>A prancheta é um livro de duas páginas, e cada página tem as suas abas.</p>
+
+  <div class="book">
+    <div class="page">
+      <h5>Página esquerda · Trabalho de rua</h5>
+      <div class="tabs"><span>Capa</span><span>Cidadãos</span><span>Bandos</span><span>Ocorrências</span><span>Penas</span></div>
+      <p>É onde você consulta e registra.</p>
+    </div>
+    <div class="page">
+      <h5>Página direita · Apoio</h5>
+      <div class="tabs"><span>Oficiais</span><span>Investig.</span><span>Procurados</span><span>Armas</span><span>Papéis</span><span>Código</span></div>
+      <p>Quando você clica em um item da esquerda, como um nome ou uma ocorrência, os detalhes abrem aqui.</p>
+    </div>
+  </div>
+
+  <ul class="star">
+    <li><strong>Botões de ação:</strong> ficam embaixo da página, por exemplo <span class="btn-ref">Nova ocorrência</span>, <span class="btn-ref">Prender</span> e <span class="btn-ref">Multar</span>.</li>
+    <li><strong>Botões pequenos:</strong> os botões do tipo <span class="btn-ref">+ Suspeito</span>, <span class="btn-ref">Escolher</span> ou <span class="btn-ref">Código</span> abrem uma janela. Nela você busca a pessoa pelo nome, apelido ou ID fixo, ou clica em <span class="btn-ref">Pessoas por perto</span> para ver quem está ao seu redor.</li>
+  </ul>
+
+  <h3 class="section" id="capa"><span class="num">2</span>Primeiros passos: a Capa</h3>
+  <p>A Capa é a primeira tela que você vê ao abrir a prancheta, e é por ela que você começa o serviço.</p>
+  <ol class="steps">
+    <li><strong>Confira seu cartão:</strong> veja se aparecem seu nome, seu cargo, sua delegacia e o selo <span class="stamp ok">EM SERVIÇO</span>.</li>
+    <li><strong>Leia os Telegramas da Central:</strong> são os chamados abertos, como um assalto, um SOS de cidadão ou um oficial que apertou o botão de emergência.</li>
+    <li>Clique em <span class="btn-ref">Rota</span> no telegrama que você vai atender. O local fica marcado no seu mapa.</li>
+  </ol>
+
+  <div class="telegram" data-label="TELEGRAMA · EXEMPLO">
+    <p>Chega o telegrama <em>“SOS: cidadão solicita assistência (perto de Valentine)”</em>. Clique em Rota, vá até o local e, depois de resolver, registre o que aconteceu em uma ocorrência.</p>
+  </div>
+
+  <div class="notice">
+    <span class="label">Prioridade máxima</span>
+    <p>Um chamado de botão de emergência quer dizer que um oficial está em perigo. Ele tem prioridade sobre qualquer outro chamado.</p>
+  </div>
+
+  <h3 class="section" id="ocorrencia"><span class="num">3</span>Registrar uma ocorrência</h3>
+  <p>Toda ação policial precisa ser registrada no Livro de Ocorrências. <strong>O que não está registrado não conta:</strong> nem como prova, nem para o seu Quadro de Honra.</p>
+  <p>Para abrir o formulário, clique em <span class="btn-ref">Nova ocorrência</span>, que fica na Capa ou na aba Ocorrências. No topo do formulário, escolha o tipo: <strong>Ocorrência</strong>, para um fato atendido, ou <strong>Depoimento</strong>, para registrar a fala de alguém.</p>
+
+  <h4>Página esquerda: os dados</h4>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Campo</th><th>O que colocar</th></tr></thead>
+      <tbody>
+        <tr><td>Título</td><td>Um resumo curto do fato</td></tr>
+        <tr><td>Suspeitos</td><td>Clique em <span class="btn-ref">+ Suspeito</span> para cada suspeito que foi identificado</td></tr>
+        <tr><td>Suspeitos desconhecidos</td><td>A quantidade de suspeitos sem nome</td></tr>
+        <tr><td>Bando</td><td>Se o grupo já tem um dossiê, vincule clicando em <span class="btn-ref">+ Bando</span></td></tr>
+        <tr><td>Reféns e vítimas</td><td>Clique em <span class="btn-ref">+ Refém</span> ou <span class="btn-ref">+ Vítima</span> para cada pessoa</td></tr>
+        <tr><td>Testemunhas</td><td>Clique em <span class="btn-ref">+ Testemunha</span> para cada pessoa</td></tr>
+        <tr><td>Posto e Local</td><td>Sua delegacia e o lugar do fato</td></tr>
+        <tr><td>Artigos</td><td>Clique em <span class="btn-ref">+ Artigo</span> e escolha até 3 crimes no Código</td></tr>
+        <tr><td>Prisão e Multa</td><td>Esses valores são preenchidos sozinhos com a soma dos artigos, mas você pode ajustar</td></tr>
+        <tr><td>Contrabando</td><td>Clique em <span class="btn-ref">+ Item</span> para cada item apreendido</td></tr>
+        <tr><td>Oficiais presentes</td><td>Clique em <span class="btn-ref">Anotar oficial</span> para cada colega que participou</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>Página direita: a narrativa</h4>
+  <p>Escreva o que aconteceu, em ordem e do ponto de vista do oficial. Comece com <em>“Por volta das ... horas, este oficial...”</em>.</p>
+
+  <h4>Para finalizar, use os botões de baixo</h4>
+  <ul class="star">
+    <li><span class="btn-ref">Lavrar</span> registra a ocorrência de forma oficial.</li>
+    <li><span class="btn-ref">Rascunho</span> salva para terminar depois. A ocorrência fica no filtro Rascunhos.</li>
+    <li><span class="btn-ref">Provas</span> anexa as provas da ocorrência.</li>
+    <li><span class="btn-ref">Cancelar</span> descarta tudo.</li>
+  </ul>
+
+  <div class="telegram" data-label="EXEMPLO · ASSALTO À DILIGÊNCIA">
+    <p>Dois homens mascarados assaltaram uma diligência na estrada de Rhodes. Um deles foi identificado e o outro fugiu.</p>
+    <ul>
+      <li>Título: Assalto à diligência na estrada de Rhodes</li>
+      <li>Suspeitos: o suspeito identificado. Suspeitos desconhecidos: 1</li>
+      <li>Vítima: o condutor da diligência</li>
+      <li>Artigos: o roubo e o art. 11, Uso de Máscara ou Bandana em Perímetro Urbano</li>
+      <li>Narrativa: “Por volta das 17h, este oficial foi acionado pela Central...”</li>
+      <li>Clique em Lavrar.</li>
+    </ul>
+  </div>
+  <p>Se a ocorrência tiver pena e você ainda não tiver prendido ou multado, ela aparece na lista com o selo <span class="stamp">PENA A APLICAR</span>.</p>
+
+  <h3 class="section" id="penas"><span class="num">4</span>Prender e multar</h3>
+  <p>Os botões <span class="btn-ref">Prender</span> e <span class="btn-ref">Multar</span> ficam na Capa e na aba Penas.</p>
+  <div class="notice">
+    <span class="label">Antes de usar</span>
+    <p>Confira duas condições: a pessoa precisa estar <strong>online</strong> e a <strong>no máximo 5 metros</strong> de você.</p>
+  </div>
+
+  <div class="cols">
+    <div>
+      <h4>Prisão</h4>
+      <p>A prisão manda a pessoa para o cárcere do condado.</p>
+      <ol class="steps">
+        <li>Em Pessoa, clique em <span class="btn-ref">Escolher</span> e selecione o preso.</li>
+        <li>Em Artigos, clique em <span class="btn-ref">Código</span> e marque os crimes. Os minutos e a multa são preenchidos sozinhos.</li>
+        <li>Se precisar, ajuste os campos Minutos e Multa junto ($).</li>
+        <li>Em Motivo, escreva uma frase curta.</li>
+        <li>Clique em <span class="btn-ref">Prender</span>.</li>
+      </ol>
+      <p>Depois disso, o preso aparece na aba Penas, no Livro de Prisões, com o status <span class="stamp">PRESO</span>.</p>
+    </div>
+    <div>
+      <h4>Multa</h4>
+      <p>A multa vira uma cobrança no banco do multado. O preenchimento é igual ao da prisão: Pessoa, Artigos, Valor ($) e Motivo, e no fim você clica em <span class="btn-ref">Multar</span>.</p>
+      <p>Enquanto a multa estiver <span class="stamp">EM ABERTO</span>, a conta do multado fica travada para saques e transferências. Depósitos continuam funcionando. Você acompanha as multas pelo Livro de Multas, na aba Penas.</p>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="telegram" data-label="EXEMPLO · PRISÃO">
+      <p>O suspeito fugiu de você em Valentine. Escolha a pessoa, marque o art. 12 (Resistência à Prisão, que dá 20 min e $15,00), escreva o motivo <em>Resistência à prisão em Valentine</em> e clique em Prender.</p>
+    </div>
+    <div class="telegram" data-label="EXEMPLO · MULTA">
+      <p>Um cidadão está galopando dentro da cidade. Marque o art. 9 (Correr com Carroça, Cavalo ou a Pé no Perímetro Urbano, que dá $5,00) e clique em Multar. Se ele estiver de carroça, a multa tem mais $2,00.</p>
+    </div>
+  </div>
+
+  <h3 class="section" id="codigo"><span class="num">5</span>Como o Código calcula a pena</h3>
+  <p>O Código Penal fica na aba Código e também abre pelo botão <span class="btn-ref">Código</span> das janelas de prisão e multa. Para usar, marque os artigos e clique em <span class="btn-ref">Anotar artigos</span>. A pena é calculada assim:</p>
+  <ul class="star">
+    <li>Você pode marcar <strong>no máximo 3 artigos</strong> por ocorrência.</li>
+    <li><strong>Prisão:</strong> os minutos dos artigos são somados até o limite de 30 min. Se a soma passar disso, a pena passa a ser a do maior crime.</li>
+    <li><strong>Multa:</strong> o valor nunca passa da maior multa entre os artigos marcados.</li>
+    <li>O oficial pode ajustar os valores conforme o caso, por exemplo em reincidência ou em primeiro erro.</li>
+    <li>Artigos com o selo <span class="stamp">INAFIANÇÁVEL</span>, como Resistência à Prisão e Corrupção, não podem ser pagos com fiança.</li>
+  </ul>
+
+  <div class="cols">
+    <div class="telegram" data-label="EXEMPLO 1">
+      <p>Agressão (10 min, $8) + Desordem Pública (10 min, $8). A prisão fica em <strong>20 min</strong>, porque a soma não passou de 30. A multa fica em até <strong>$8</strong>.</p>
+    </div>
+    <div class="telegram" data-label="EXEMPLO 2">
+      <p>Agressão (10 min) + Desordem Pública (10 min) + Uso de Máscara (15 min, $20). A soma dá 35 min, que passa de 30, então vale a pena do maior crime: <strong>15 min</strong>. A multa fica em até <strong>$20</strong>.</p>
+    </div>
+  </div>
+  <p>No Código, os crimes estão separados em capítulos: <strong>Crimes contra a Honra</strong>, <strong>Crimes Administrativos</strong>, <strong>Crimes Graves</strong> e <strong>Crimes Gravíssimos</strong>. Para achar um crime rápido, use a busca pelo nome ou pelo número do artigo.</p>
+
+  <h3 class="section" id="abas"><span class="num">6</span>As outras abas</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Aba</th><th>Para que serve</th><th>Exemplo de uso</th></tr></thead>
+      <tbody>
+        <tr><td>Cidadãos</td><td>Ficha de cada pessoa. Dá para buscar por nome, apelido ou ID e filtrar por Procurados, Com mandado, Presos ou Multas pendentes</td><td>Durante uma abordagem, clique em Quem está perto e veja se a pessoa tem <span class="stamp">MULTA PENDENTE</span></td></tr>
+        <tr><td>Bandos</td><td>Dossiês de grupos e gangues</td><td>Clique em Novo dossiê quando o mesmo grupo aparecer em mais de uma ocorrência</td></tr>
+        <tr><td>Ocorrências</td><td>Todas as ocorrências registradas. Os filtros são Todas, Minhas, Rascunhos e Departamento</td><td>Abra Rascunhos para terminar um registro que ficou pela metade</td></tr>
+        <tr><td>Penas</td><td>O cárcere, o Livro de Prisões e o Livro de Multas</td><td>Confira se o preso aparece como PRESO e se a multa aparece como EM ABERTO</td></tr>
+        <tr><td>Oficiais</td><td>O efetivo da Cavalaria, o Quadro de Honra e o Quadro de horas (ponto)</td><td>Bata o ponto ao entrar e ao sair de serviço</td></tr>
+        <tr><td>Investig.</td><td>Inquéritos de casos longos, nos filtros Em andamento, No Juiz e Arquivados</td><td>Clique em Instaurar para abrir uma investigação de um bando</td></tr>
+        <tr><td>Procurados</td><td>O mural de cartazes, nos filtros Em aberto e Encerrados</td><td>Crie um Novo cartaz para um foragido e encerre o cartaz quando ele for preso</td></tr>
+        <tr><td>Armas</td><td>O registro de armas por número de série ou dono, e o Armário de provas</td><td>Uma arma com o selo <span class="stamp">SEM REGISTRO</span> deve ser apreendida e guardada no Armário de provas</td></tr>
+        <tr><td>Papéis</td><td>Os documentos do juiz, como mandados</td><td>Digite o número do selo do documento (ex.: 1F4-2201) e clique em Conferir para ver se ele é verdadeiro</td></tr>
+        <tr><td>Código</td><td>O Código Penal do Condado</td><td>Use a busca para consultar a pena de um crime antes de prender alguém</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pager"><a href="cursos.html">← Grade de Cursos</a><a href="patrulha.html">Patrulha e Abordagem →</a></div>
+
+</main>
+</div>
+<script src="js/layout.js"></script>
+</body>
+</html>
