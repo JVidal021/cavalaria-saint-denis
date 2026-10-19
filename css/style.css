@@ -651,3 +651,4 @@ footer.foot .seal { font-family: var(--f-display); font-size: 1.1rem; color: var
 h4, .book .page h5 { font-weight: 700; }
 .btn-ref, .book .tabs span, .stamp { font-weight: 700; }
 .telegram { font-style: italic; }
+.hero-sub { font-variant: small-caps; letter-spacing: .2em; font-size: 1.15rem; color: var(--blood); margin: 0 0 12px; }

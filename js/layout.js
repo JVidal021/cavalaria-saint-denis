@@ -3,6 +3,7 @@
   var PAGES = [
     { id: "inicio", href: "index.html", label: "Início" },
     { id: "cursos", href: "cursos.html", label: "Grade de Cursos" },
+    { id: "conduta", href: "conduta.html", label: "Conduta" },
     { id: "prancheta", href: "prancheta.html", label: "Prancheta" },
     { id: "patrulha", href: "patrulha.html", label: "Patrulha & Abordagem" },
     { id: "lideranca", href: "lideranca.html", label: "Liderança" },
