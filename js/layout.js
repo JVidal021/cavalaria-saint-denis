@@ -18,7 +18,7 @@
     tips(50, 50, 46, 6) +
     '<circle cx="50" cy="50" r="19" fill="#7a5420" opacity=".25"/>' +
     '<circle cx="50" cy="50" r="17" fill="none" stroke="#3a2610" stroke-width="1.2"/>' +
-    '<text x="50" y="57" text-anchor="middle" font-family="Rye, serif" font-size="18" fill="#2b1d12">SD</text>' +
+    '<text x="50" y="57" text-anchor="middle" font-family="Caladea, serif" font-weight="700" font-size="18" fill="#2b1d12">SD</text>' +
     '</svg>';
 
   function star(cx, cy, R, r, n) {

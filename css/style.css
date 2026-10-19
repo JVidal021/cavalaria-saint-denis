@@ -18,10 +18,10 @@
   --leather-dark: #24160c;
   --rule: rgba(43, 29, 18, .55);
 
-  --f-display: "Rye", "Georgia", serif;
-  --f-title: "IM Fell English SC", "Georgia", serif;
-  --f-body: "IM Fell English", "Georgia", serif;
-  --f-type: "Special Elite", "Courier New", monospace;
+  --f-display: "Caladea", "Cambria", "Georgia", serif;
+  --f-title: "Caladea", "Cambria", "Georgia", serif;
+  --f-body: "Caladea", "Cambria", "Georgia", serif;
+  --f-type: "Caladea", "Cambria", "Georgia", serif;
 }
 
 * { box-sizing: border-box; }
@@ -641,3 +641,13 @@ footer.foot .seal { font-family: var(--f-display); font-size: 1.1rem; color: var
   .sheet { box-shadow: none; margin: 0; max-width: none; background: #fff; }
   .nav, .pager { display: none; }
 }
+
+/* ---------- Tipografia Caladea (mesma dos documentos da Cavalaria) ---------- */
+.masthead h1, .hero h2, h3.section, .card h5, .poster .big, .poster .reward,
+.tier header h4, footer.foot .seal, .notice::before { font-weight: 700; }
+.masthead h1 { letter-spacing: 0; }
+.masthead .sub, .kicker, .edition, .nav, h4, th, .card .tag, .poster .mid,
+.telegram::before, .notice .label, .toc strong, .book .page h5 { font-variant: small-caps; }
+h4, .book .page h5 { font-weight: 700; }
+.btn-ref, .book .tabs span, .stamp { font-weight: 700; }
+.telegram { font-style: italic; }
