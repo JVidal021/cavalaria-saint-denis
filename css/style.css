@@ -653,6 +653,59 @@ h4, .book .page h5 { font-weight: 700; }
 .telegram { font-style: italic; }
 .hero-sub { font-variant: small-caps; letter-spacing: .2em; font-size: 1.15rem; color: var(--blood); margin: 0 0 12px; }
 
-/* ---------- Prova (Formulário Google incorporado) ---------- */
-.prova-frame { border: 2px solid var(--leather); background: #fff; box-shadow: 0 6px 16px rgba(0,0,0,.25); }
-.prova-frame iframe { display: block; width: 100%; height: 1400px; border: 0; }
+/* ---------- Prova de Conhecimento ---------- */
+.ficha { border: 2px solid var(--ink); outline: 1px solid var(--ink); outline-offset: -7px; margin: 26px 0 8px; padding: 18px 22px 20px; background: rgba(255, 248, 228, .45); }
+.ficha legend { font-family: var(--f-display); font-size: 1.35rem; padding: 0 10px; color: var(--blood); }
+.ficha-campos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 28px; }
+.ficha-campo label { display: block; font-variant: small-caps; letter-spacing: .1em; font-weight: 700; color: var(--ink-soft); }
+.ficha-campo .opc { font-variant: normal; letter-spacing: 0; font-weight: 400; font-style: italic; color: var(--ink-faint); }
+.ficha-campo input {
+  width: 100%; font: inherit; font-size: 1.15rem; color: var(--ink); background: transparent;
+  border: 0; border-bottom: 2px dotted var(--ink-soft); padding: 4px 2px; outline: none;
+}
+.ficha-campo input:focus { border-bottom-style: solid; border-bottom-color: var(--blood); background: rgba(255, 255, 255, .35); }
+.ficha-campo input.faltando { border-bottom-color: var(--blood); background: rgba(122, 31, 20, .08); }
+
+.q { border: 1px solid var(--rule); margin: 16px 0; padding: 14px 18px 12px; background: rgba(255, 248, 228, .35); min-width: 0; }
+.q legend { padding: 0; font-size: 1.1rem; font-weight: 700; line-height: 1.4; float: left; width: 100%; margin-bottom: 10px; }
+.q .q-opcoes { clear: both; }
+.q-num { display: block; font-variant: small-caps; letter-spacing: .15em; font-size: .85rem; font-weight: 700; color: var(--blood); }
+.q.faltando { border: 2px solid var(--blood); background: rgba(122, 31, 20, .06); }
+.opcao { display: flex; align-items: flex-start; gap: 12px; padding: 7px 10px; margin: 2px 0; cursor: pointer; border: 1px solid transparent; }
+.opcao:hover { background: rgba(43, 29, 18, .05); border-color: var(--rule); }
+.opcao input { position: absolute; opacity: 0; pointer-events: none; }
+.opcao .letra {
+  flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  border: 1.5px solid var(--ink); font-variant: small-caps; font-weight: 700; line-height: 1; margin-top: 1px;
+}
+.opcao input:checked ~ .letra { background: var(--blood); border-color: var(--blood-dark); color: var(--paper-light); }
+.opcao input:checked ~ .texto { font-weight: 700; }
+.opcao input:focus-visible ~ .letra { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+.enviar-area { text-align: center; margin: 30px 0 10px; }
+.enviar-area .notice { text-align: left; }
+.btn-enviar {
+  font-family: var(--f-display); font-size: 1.5rem; letter-spacing: .03em; cursor: pointer;
+  color: var(--ink); padding: 12px 34px; border: 2px solid #5a3d14; border-radius: 3px;
+  background: linear-gradient(180deg, #f0d48c, #c39343 55%, #9a6d26);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 3px 0 #4a3210, 0 6px 14px rgba(0,0,0,.3);
+}
+.btn-enviar:hover { filter: brightness(1.06); }
+.btn-enviar:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 1px 0 #4a3210; }
+.btn-enviar:disabled { filter: grayscale(.6); cursor: wait; }
+
+.contador {
+  position: sticky; bottom: 12px; z-index: 5; width: fit-content; margin: 18px auto 0;
+  display: flex; align-items: center; gap: 12px; padding: 6px 16px;
+  background: var(--leather); color: var(--paper-light); border: 1px solid var(--brass);
+  box-shadow: 0 4px 12px rgba(0,0,0,.4); font-variant: small-caps; letter-spacing: .08em;
+}
+.contador-num { font-family: var(--f-display); font-variant: normal; font-size: 1.1rem; color: var(--brass-light); }
+.contador-barra { display: block; width: 120px; height: 6px; background: rgba(255,255,255,.15); }
+.contador-barra i { display: block; height: 100%; background: var(--brass-light); transition: width .2s; }
+
+@media (max-width: 820px) {
+  .ficha-campos { grid-template-columns: 1fr; }
+  .q { padding: 12px 12px 10px; }
+  .contador-barra { width: 70px; }
+}

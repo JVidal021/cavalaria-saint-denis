@@ -7,8 +7,7 @@
     { id: "prancheta", href: "prancheta.html", label: "Prancheta" },
     { id: "patrulha", href: "patrulha.html", label: "Patrulha & Abordagem" },
     { id: "lideranca", href: "lideranca.html", label: "Liderança" },
-    { id: "negociacao", href: "negociacao.html", label: "Negociação" },
-    { id: "prova", href: "prova.html", label: "Prova" }
+    { id: "negociacao", href: "negociacao.html", label: "Negociação" }
   ];
 
   var BADGE =
@@ -53,21 +52,24 @@
     "</svg>";
 
   var current = document.body.getAttribute("data-page");
+  // Páginas isoladas (como a prova) não mostram o menu nem levam ao restante do site.
+  var isolada = document.body.hasAttribute("data-isolada");
 
   var nav = PAGES.map(function (p) {
     return '<a href="' + p.href + '"' + (p.id === current ? ' aria-current="page"' : "") + ">" + p.label + "</a>";
   }).join("");
 
+  var brandInner = BADGE +
+    "<div><h1>Cavalaria de Saint Denis</h1><div class=\"sub\">Livro da Cavalaria · S.D.</div></div>";
+
   var header =
     '<header class="masthead">' +
     '<div class="edition"><span>Condado de Saint Denis</span><span>Edição Oficial · Anno 1899</span><span>Denver RP</span></div>' +
-    '<a class="brand" href="index.html">' + BADGE +
-    "<div><h1>Cavalaria de Saint Denis</h1><div class=\"sub\">Livro da Cavalaria · S.D.</div></div>" +
-    "</a>" +
+    (isolada ? '<div class="brand">' + brandInner + "</div>" : '<a class="brand" href="index.html">' + brandInner + "</a>") +
     '<p class="motto">“Disciplina, preparo e compromisso com o dever.”</p>' +
     "</header>" +
     '<hr class="double-rule">' +
-    '<nav class="nav" aria-label="Navegação principal">' + nav + "</nav>";
+    (isolada ? "" : '<nav class="nav" aria-label="Navegação principal">' + nav + "</nav>");
 
   var footer =
     '<footer class="foot">' +
