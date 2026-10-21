@@ -2,29 +2,26 @@
 window.PROVA = {
  "api": "https://script.google.com/macros/s/AKfycbxZuPJ7j-xfCwEAuJxcsvm9dc02KAW3j3tvBGLLlRXvBceFivF_5WZF0qXcHXeCB4eu/exec",
  "acao": "https://docs.google.com/forms/d/e/1FAIpQLSeBbxQwgOUC-6jo5yXNaYNHs8GloC11bWk78EuSE7DKTy3Bdw/formResponse",
- "paginas": 7,
+ "paginas": 6,
  "notaMinima": 70,
- "totalQuestoes": 30,
+ "sorteio": 4,
+ "totalQuestoes": 20,
  "modulos": [
   {
-   "nome": "Grade de Cursos",
-   "total": 2
-  },
-  {
    "nome": "Código de Conduta",
-   "total": 6
+   "total": 4
   },
   {
    "nome": "MDT · Prancheta",
-   "total": 6
+   "total": 4
   },
   {
    "nome": "Patrulha e Abordagem",
-   "total": 6
+   "total": 4
   },
   {
    "nome": "Negociação",
-   "total": 6
+   "total": 4
   },
   {
    "nome": "Liderança de Patrulha",

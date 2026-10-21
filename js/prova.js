@@ -6,6 +6,7 @@
   var LETRAS = "abcd";
   var CHAVE_RASCUNHO = "cavalaria-prova-rascunho";
   var CHAVE_ENVIO = "cavalaria-prova-enviada";
+  var CHAVE_SORTEIO = "cavalaria-prova-sorteio";
 
   var form = document.getElementById("prova");
   var status = document.getElementById("prova-status");
@@ -23,6 +24,49 @@
     return e;
   }
   function esc(t) { var d = document.createElement("div"); d.textContent = t; return d.innerHTML; }
+  function embaralhar(lista) {
+    var a = lista.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  // Sorteia N questões por tópico e embaralha as alternativas de cada uma.
+  // O sorteio fica guardado: recarregar a página não troca as questões do oficial.
+  function sortear(banco, n) {
+    banco = banco.map(function (m) {
+      return { nome: m.nome, questoes: m.questoes.filter(function (q) { return q.entry; }) };
+    });
+    var porEntry = {};
+    banco.forEach(function (m) { m.questoes.forEach(function (q) { porEntry[q.entry] = q; }); });
+
+    function montarSelecao(sel) {
+      return sel.map(function (lista, mi) {
+        return {
+          nome: banco[mi].nome,
+          questoes: lista.map(function (s) {
+            var q = porEntry[s.entry];
+            if (!q) throw new Error("questão fora do banco");
+            return { entry: q.entry, q: q.q, o: s.ordem.map(function (k) { return q.o[k]; }) };
+          })
+        };
+      });
+    }
+
+    var salvo = ler(CHAVE_SORTEIO);
+    if (salvo && salvo.length === banco.length) {
+      try { return montarSelecao(salvo); } catch (e) { /* banco mudou: sorteia de novo */ }
+    }
+    var sel = banco.map(function (m) {
+      return embaralhar(m.questoes).slice(0, n).map(function (q) {
+        return { entry: q.entry, ordem: embaralhar(q.o.map(function (_, i) { return i; })) };
+      });
+    });
+    guardar(CHAVE_SORTEIO, sel);
+    return montarSelecao(sel);
+  }
 
   // Já enviou neste navegador: mostra só o comprovante.
   var envio = ler(CHAVE_ENVIO);
@@ -31,7 +75,7 @@
   // As questões só chegam se a prova estiver aberta na agenda.
   Agenda.consultar(true).then(function (e) {
     if (!e.aberta || !e.modulos) { fechada(Agenda.descrever(e)); return; }
-    MODULOS = e.modulos;
+    MODULOS = sortear(e.modulos, e.sorteio || P.sorteio);
     total = MODULOS.reduce(function (n, m) { return n + m.questoes.length; }, 0);
     statusTexto.innerHTML = Agenda.descrever(e);
     montar();
@@ -211,6 +255,7 @@
       };
       guardar(CHAVE_ENVIO, registro);
       apagar(CHAVE_RASCUNHO);
+      apagar(CHAVE_SORTEIO);
       mostrarEnviada(registro);
     };
     envioForm.submit();
