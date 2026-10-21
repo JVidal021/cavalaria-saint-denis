@@ -8,7 +8,10 @@
   var CHAVE_ENVIO = "cavalaria-prova-enviada";
 
   var form = document.getElementById("prova");
-  var total = P.modulos.reduce(function (n, m) { return n + m.questoes.length; }, 0);
+  var status = document.getElementById("prova-status");
+  var statusTexto = document.getElementById("prova-status-texto");
+  var MODULOS = [];
+  var total = 0;
 
   function guardar(chave, valor) { try { localStorage.setItem(chave, JSON.stringify(valor)); } catch (e) {} }
   function ler(chave) { try { return JSON.parse(localStorage.getItem(chave)); } catch (e) { return null; } }
@@ -25,6 +28,27 @@
   var envio = ler(CHAVE_ENVIO);
   if (envio) { mostrarEnviada(envio); return; }
 
+  // As questões só chegam se a prova estiver aberta na agenda.
+  Agenda.consultar(true).then(function (e) {
+    if (!e.aberta || !e.modulos) { fechada(Agenda.descrever(e)); return; }
+    MODULOS = e.modulos;
+    total = MODULOS.reduce(function (n, m) { return n + m.questoes.length; }, 0);
+    statusTexto.innerHTML = Agenda.descrever(e);
+    montar();
+  }).catch(function () {
+    fechada("Não foi possível consultar a agenda da prova. Verifique sua internet e recarregue a página.");
+  });
+
+  function fechada(msg) {
+    status.setAttribute("data-label", "AVISO DA CENTRAL · PROVA FECHADA");
+    statusTexto.innerHTML = msg;
+    form.hidden = true;
+    document.getElementById("contador").hidden = true;
+  }
+
+  function montar() {
+  form.hidden = false;
+  document.getElementById("contador").hidden = false;
   // ---------- Montagem ----------
   var ident = document.getElementById("identificacao");
   P.identificacao.forEach(function (c) {
@@ -39,7 +63,7 @@
 
   var area = document.getElementById("questoes");
   var n = 0;
-  P.modulos.forEach(function (m, mi) {
+  MODULOS.forEach(function (m, mi) {
     var sec = el("section", { "class": "modulo" });
     sec.appendChild(el("h3", { "class": "section" }, '<span class="num">' + ROMANOS[mi] + "</span>" + esc(m.nome)));
     m.questoes.forEach(function (q) {
@@ -88,7 +112,7 @@
     var d = respostas();
     guardar(CHAVE_RASCUNHO, d);
     var feitas = 0;
-    P.modulos.forEach(function (m) { m.questoes.forEach(function (q) { if (d["entry." + q.entry]) feitas++; }); });
+    MODULOS.forEach(function (m) { m.questoes.forEach(function (q) { if (d["entry." + q.entry]) feitas++; }); });
     contador.innerHTML = '<span class="contador-num">' + feitas + "/" + total + "</span> respondidas" +
       '<span class="contador-barra"><i style="width:' + (feitas / total * 100) + '%"></i></span>';
     [].forEach.call(document.querySelectorAll(".q"), function (fs) {
@@ -113,7 +137,7 @@
       if (vazio) faltas.push(input);
     });
     var k = 0;
-    P.modulos.forEach(function (m) {
+    MODULOS.forEach(function (m) {
       m.questoes.forEach(function (q) {
         k++;
         var fs = document.getElementById("q" + k);
@@ -140,6 +164,23 @@
     var botao = document.getElementById("btn-enviar");
     botao.disabled = true;
     botao.textContent = "Enviando…";
+    Agenda.consultar(false).then(function (e) {
+      if (!e.aberta) {
+        botao.textContent = "Prova encerrada";
+        aviso.hidden = false;
+        aviso.innerHTML = '<span class="label">Horário encerrado</span>O horário de aplicação terminou e a prova não pode mais ser enviada. Procure o instrutor.';
+        return;
+      }
+      enviar(d, botao);
+    }).catch(function () {
+      botao.disabled = false;
+      botao.textContent = "Enviar a prova";
+      aviso.hidden = false;
+      aviso.innerHTML = '<span class="label">Falha no envio</span>Não foi possível confirmar o horário da prova. Verifique sua internet e tente de novo; suas respostas continuam salvas.';
+    });
+  });
+
+  function enviar(d, botao) {
 
     // Formulário oculto que posta direto no Google Forms (todas as páginas de uma vez).
     var envioForm = el("form", { action: P.acao, method: "POST", target: "prova-destino", hidden: "" });
@@ -173,12 +214,14 @@
       mostrarEnviada(registro);
     };
     envioForm.submit();
-  });
+  }
+  } // fim de montar()
 
   function mostrarEnviada(r) {
     form.hidden = true;
     var c = document.getElementById("contador");
     if (c) c.hidden = true;
+    document.getElementById("prova-status").hidden = true;
     document.getElementById("prova-enviada").hidden = false;
     document.getElementById("prova-enviada-texto").innerHTML =
       "Prova de <strong>" + esc(r.patente || "") + " " + esc(r.nome || "") + "</strong> recebida pela Cavalaria em " +

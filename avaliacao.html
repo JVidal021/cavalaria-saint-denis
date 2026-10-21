@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prova de Conhecimento · Cavalaria SD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="avaliacao">
+<div class="sheet">
+<main>
+
+  <section class="hero">
+    <span class="kicker">Avaliação Oficial</span>
+    <h2>Prova de Conhecimento</h2>
+    <p class="hero-sub">da Cavalaria de Saint Denis</p>
+    <p class="lead">Avaliação escrita dos cursos da Cavalaria, aplicada nas datas definidas pelo instrutor.</p>
+    <span data-ornament></span>
+  </section>
+
+  <div class="telegram" id="agenda-status" data-label="AGENDA DA PROVA">
+    <p id="agenda-texto">Consultando a agenda da prova…</p>
+  </div>
+  <p class="iniciar-area">
+    <a class="btn-enviar" id="btn-iniciar" href="prova.html" aria-disabled="true">Iniciar a prova</a>
+  </p>
+
+  <div class="cols">
+    <div>
+      <h3 class="section">Instruções</h3>
+      <ol class="steps">
+        <li>A prova só abre <strong>no dia e horário</strong> informados pelo instrutor. Fora disso, ela fica fechada.</li>
+        <li>Durante a prova, <strong>o material não fica disponível</strong>: a página da prova não tem menu nem links. Estude antes.</li>
+        <li>Responda <strong>sozinho e sem consultar</strong>. Preencha nome, ID fixo e patente exatamente como estão no MDT.</li>
+        <li>São <strong>30 questões objetivas</strong>, todas obrigatórias, com uma única resposta correta.</li>
+        <li>Envie <strong>uma única vez</strong>. Todo envio fica registrado para o instrutor.</li>
+        <li>A nota mínima é <strong>70%</strong> (21 acertos). O resultado é divulgado pelo instrutor.</li>
+      </ol>
+    </div>
+    <div>
+      <h3 class="section">O que estudar</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Módulo</th><th style="text-align:right">Questões</th></tr></thead>
+          <tbody>
+            <tr><td><a href="cursos.html">Grade de Cursos</a></td><td class="cost">2</td></tr>
+            <tr><td><a href="conduta.html">Código de Conduta</a></td><td class="cost">6</td></tr>
+            <tr><td><a href="prancheta.html">MDT · Prancheta</a></td><td class="cost">6</td></tr>
+            <tr><td><a href="patrulha.html">Patrulha e Abordagem</a></td><td class="cost">6</td></tr>
+            <tr><td><a href="negociacao.html">Negociação</a></td><td class="cost">6</td></tr>
+            <tr><td><a href="lideranca.html">Liderança de Patrulha</a></td><td class="cost">4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice instrutor">
+    <span class="label">Também na aplicação</span>
+    <p>Além da prova escrita, o instrutor fará perguntas orais e uma situação prática sobre os mesmos assuntos.</p>
+  </div>
+
+</main>
+</div>
+<script src="js/layout.js"></script>
+<script src="js/prova-data.js"></script>
+<script src="js/agenda.js"></script>
+<script>
+  (function () {
+    var texto = document.getElementById("agenda-texto");
+    var botao = document.getElementById("btn-iniciar");
+    function bloquear(sim) {
+      botao.setAttribute("aria-disabled", sim ? "true" : "false");
+      botao.classList.toggle("bloqueado", sim);
+    }
+    botao.addEventListener("click", function (ev) { if (botao.classList.contains("bloqueado")) ev.preventDefault(); });
+    bloquear(true);
+    Agenda.consultar(false).then(function (e) {
+      texto.innerHTML = Agenda.descrever(e);
+      bloquear(!e.aberta);
+    }).catch(function () {
+      texto.innerHTML = "Não foi possível consultar a agenda agora. Recarregue a página em instantes.";
+    });
+  })();
+</script>
+</body>
+</html>

@@ -23,11 +23,15 @@
     <span data-ornament></span>
   </section>
 
+  <div id="prova-status" class="telegram" data-label="AVISO DA CENTRAL">
+    <p id="prova-status-texto">Consultando a agenda da prova…</p>
+  </div>
+
   <div id="prova-enviada" class="telegram" data-label="TELEGRAMA · PROVA RECEBIDA" hidden>
     <p id="prova-enviada-texto">Sua prova foi recebida pela Cavalaria. O resultado será divulgado pelo instrutor.</p>
   </div>
 
-  <form id="prova" novalidate>
+  <form id="prova" novalidate hidden>
     <h3 class="section">Instruções</h3>
     <ol class="steps">
       <li>Responda <strong>sozinho e sem consultar</strong> nenhum material.</li>
@@ -50,13 +54,14 @@
     </div>
   </form>
 
-  <div class="contador" id="contador" aria-live="polite"></div>
+  <div class="contador" id="contador" aria-live="polite" hidden></div>
   <iframe name="prova-destino" id="prova-destino" title="Envio da prova" hidden></iframe>
 
 </main>
 </div>
 <script src="js/layout.js"></script>
 <script src="js/prova-data.js"></script>
+<script src="js/agenda.js"></script>
 <script src="js/prova.js"></script>
 </body>
 </html>

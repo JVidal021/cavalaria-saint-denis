@@ -7,7 +7,8 @@
     { id: "prancheta", href: "prancheta.html", label: "Prancheta" },
     { id: "patrulha", href: "patrulha.html", label: "Patrulha & Abordagem" },
     { id: "lideranca", href: "lideranca.html", label: "Liderança" },
-    { id: "negociacao", href: "negociacao.html", label: "Negociação" }
+    { id: "negociacao", href: "negociacao.html", label: "Negociação" },
+    { id: "avaliacao", href: "avaliacao.html", label: "Prova" }
   ];
 
   var BADGE =
