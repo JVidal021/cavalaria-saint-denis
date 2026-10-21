@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prova de Conhecimento · Cavalaria SD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<!-- Link do Formulário Google da prova (o "Link para os oficiais" que o script mostra). -->
+<body data-page="prova" data-form="https://docs.google.com/forms/d/e/1FAIpQLSeBbxQwgOUC-6jo5yXNaYNHs8GloC11bWk78EuSE7DKTy3Bdw/viewform">
+<div class="sheet">
+<main>
+
+  <section class="hero">
+    <span class="kicker">Avaliação Oficial</span>
+    <h2>Prova de Conhecimento</h2>
+    <p class="hero-sub">da Cavalaria de Saint Denis</p>
+    <p class="lead">30 questões objetivas sobre os cursos da Cavalaria. Estude o material antes e responda com atenção.</p>
+    <span data-ornament></span>
+  </section>
+
+  <div class="cols">
+    <div>
+      <h3 class="section">Antes de começar</h3>
+      <ol class="steps">
+        <li>Responda <strong>sem consultar</strong> o material, sozinho.</li>
+        <li>Preencha seu <strong>nome completo do personagem, ID fixo e patente</strong> exatamente como estão no MDT.</li>
+        <li>Envie a prova <strong>uma única vez</strong>. Não é possível editar depois do envio, e todo envio fica registrado para o instrutor.</li>
+        <li>A nota mínima é <strong>70%</strong> (21 acertos). O resultado é conferido pelo instrutor.</li>
+      </ol>
+    </div>
+    <div>
+      <h3 class="section">O que cai</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Módulo</th><th style="text-align:right">Questões</th></tr></thead>
+          <tbody>
+            <tr><td><a href="cursos.html">Grade de Cursos</a></td><td class="cost">2</td></tr>
+            <tr><td><a href="conduta.html">Código de Conduta</a></td><td class="cost">6</td></tr>
+            <tr><td><a href="prancheta.html">MDT · Prancheta</a></td><td class="cost">6</td></tr>
+            <tr><td><a href="patrulha.html">Patrulha e Abordagem</a></td><td class="cost">6</td></tr>
+            <tr><td><a href="negociacao.html">Negociação</a></td><td class="cost">6</td></tr>
+            <tr><td><a href="lideranca.html">Liderança de Patrulha</a></td><td class="cost">4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice instrutor">
+    <span class="label">Também no fim de semana</span>
+    <p>Além da prova escrita, o instrutor fará perguntas orais e uma situação prática sobre os mesmos assuntos.</p>
+  </div>
+
+  <div id="prova-area">
+    <h3 class="section">A prova</h3>
+    <p class="pager" style="justify-content:center"><a class="course" id="prova-abrir" href="#" target="_blank" rel="noopener">Abrir a prova em nova aba</a></p>
+    <div class="prova-frame"><iframe id="prova-form" title="Prova de Conhecimento" loading="lazy"></iframe></div>
+  </div>
+  <div id="prova-fechada" class="telegram" data-label="AVISO DA CENTRAL" hidden>
+    <p>A prova ainda não foi liberada. Aguarde o comunicado do instrutor no canal da Cavalaria.</p>
+  </div>
+
+</main>
+</div>
+<script src="js/layout.js"></script>
+<script>
+  (function () {
+    var url = document.body.getAttribute("data-form");
+    if (!url) {
+      document.getElementById("prova-area").hidden = true;
+      document.getElementById("prova-fechada").hidden = false;
+      return;
+    }
+    document.getElementById("prova-abrir").href = url;
+    document.getElementById("prova-form").src = url + (url.indexOf("?") < 0 ? "?" : "&") + "embedded=true";
+  })();
+</script>
+</body>
+</html>
