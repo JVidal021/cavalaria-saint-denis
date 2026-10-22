@@ -82,6 +82,13 @@
   sheet.insertAdjacentHTML("afterbegin", header);
   sheet.insertAdjacentHTML("beforeend", footer);
 
+  // Post-it marcador de página que leva ao Painel do Instrutor (fora das páginas isoladas, como a prova).
+  if (!isolada) {
+    sheet.insertAdjacentHTML("beforeend",
+      '<a class="postit" href="painel.html" title="Painel do Instrutor (pede senha)">' +
+      '<span class="postit-fita" aria-hidden="true"></span><span class="postit-texto">Instrutores</span></a>');
+  }
+
   document.querySelectorAll("[data-ornament]").forEach(function (el) {
     el.outerHTML = ORNAMENT;
   });
