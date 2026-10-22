@@ -28,6 +28,7 @@
       <input type="password" id="senha" autocomplete="current-password" required>
       <button type="submit" class="btn-enviar">Entrar</button>
     </div>
+    <label class="lembrar"><input type="checkbox" id="lembrar"> Lembrar neste aparelho</label>
     <p id="entrar-erro" class="notice" hidden></p>
   </form>
 
@@ -35,6 +36,7 @@
     <div class="painel-topo">
       <div class="telegram" data-label="AGENDA DA PROVA"><p id="agenda"></p></div>
       <p class="painel-acoes">
+        <span id="carga" class="carga" aria-live="polite"></span>
         <button type="button" class="btn-sec" id="atualizar">Atualizar</button>
         <button type="button" class="btn-sec" id="sair">Sair</button>
       </p>

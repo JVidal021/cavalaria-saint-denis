@@ -805,3 +805,5 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
   .postit-fita { width: 24px; margin-left: -12px; }
 }
 @media print { .postit { display: none; } }
+.lembrar { display: inline-flex !important; align-items: center; gap: 6px; margin: 12px 0 0 !important; font-variant: normal !important; letter-spacing: 0 !important; font-weight: 400 !important; color: var(--ink-soft) !important; cursor: pointer; }
+.carga { align-self: center; font-style: italic; color: var(--ink-faint); font-size: .95rem; margin-right: 4px; }

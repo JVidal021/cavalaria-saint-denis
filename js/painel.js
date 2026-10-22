@@ -2,38 +2,58 @@
 (function () {
   var API = window.PROVA && window.PROVA.api;
   var CHAVE_SENHA = "cavalaria-painel-senha";
+  var CHAVE_DADOS = "cavalaria-painel-dados";
   var dados = null;
   var aberto = null; // linha do oficial expandida
 
   var $ = function (id) { return document.getElementById(id); };
   function esc(t) { var d = document.createElement("div"); d.textContent = t == null ? "" : t; return d.innerHTML; }
-  function lerSenha() { try { return sessionStorage.getItem(CHAVE_SENHA) || ""; } catch (e) { return ""; } }
-  function guardarSenha(s) { try { s ? sessionStorage.setItem(CHAVE_SENHA, s) : sessionStorage.removeItem(CHAVE_SENHA); } catch (e) {} }
+  // Senha e últimos dados ficam na sessão; com "Lembrar neste aparelho", ficam guardados no navegador.
+  function lembrado() { try { return !!localStorage.getItem(CHAVE_SENHA); } catch (e) { return false; } }
+  function ler(chave) { try { return localStorage.getItem(chave) || sessionStorage.getItem(chave) || ""; } catch (e) { return ""; } }
+  function lerSenha() { return ler(CHAVE_SENHA); }
+  function guardar(senha, dadosNovos, lembrar) {
+    try {
+      var alvo = lembrar ? localStorage : sessionStorage;
+      var outro = lembrar ? sessionStorage : localStorage;
+      [CHAVE_SENHA, CHAVE_DADOS].forEach(function (k) { outro.removeItem(k); });
+      alvo.setItem(CHAVE_SENHA, senha);
+      if (dadosNovos) alvo.setItem(CHAVE_DADOS, JSON.stringify(dadosNovos));
+    } catch (e) {}
+  }
+  function esquecer() {
+    try { [localStorage, sessionStorage].forEach(function (a) { a.removeItem(CHAVE_SENHA); a.removeItem(CHAVE_DADOS); }); } catch (e) {}
+  }
+  function carga(texto) { $("carga").textContent = texto || ""; }
   function quando(ms) {
     if (!ms) return "—";
     var d = new Date(ms);
     return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   }
 
-  function carregar(senha) {
+  function carregar(senha, fresco, lembrar) {
     var botao = document.querySelector("#entrar button");
     botao.disabled = true;
     botao.textContent = "Conferindo…";
-    return fetch(API + "?painel=" + encodeURIComponent(senha) + "&t=" + Date.now(), { cache: "no-store" })
+    carga(fresco ? "Buscando dados novos…" : "Atualizando…");
+    if (lembrar === undefined) lembrar = lembrado();
+    return fetch(API + "?painel=" + encodeURIComponent(senha) + (fresco ? "&fresco=1" : "") + "&t=" + Date.now(), { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (r) {
         botao.disabled = false;
         botao.textContent = "Entrar";
         if (!r.ok) {
-          guardarSenha("");
+          esquecer();
+          carga("");
           $("entrar").hidden = false;
           $("painel").hidden = true;
           $("entrar-erro").hidden = false;
           $("entrar-erro").innerHTML = '<span class="label">Acesso negado</span>Senha incorreta.';
           return;
         }
-        guardarSenha(senha);
+        guardar(senha, r, lembrar);
         dados = r;
+        carga("Atualizado às " + new Date(r.geradoEm || Date.now()).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }));
         $("entrar").hidden = true;
         $("painel").hidden = false;
         desenhar();
@@ -41,6 +61,7 @@
       .catch(function () {
         botao.disabled = false;
         botao.textContent = "Entrar";
+        carga(dados ? "Sem conexão: mostrando os últimos dados" : "");
         $("entrar-erro").hidden = false;
         $("entrar-erro").innerHTML = '<span class="label">Sem conexão</span>Não foi possível falar com o servidor da prova. Tente de novo.';
       });
@@ -130,11 +151,11 @@
   $("entrar").addEventListener("submit", function (ev) {
     ev.preventDefault();
     $("entrar-erro").hidden = true;
-    carregar($("senha").value);
+    carregar($("senha").value, false, $("lembrar").checked);
   });
-  $("atualizar").addEventListener("click", function () { carregar(lerSenha()); });
+  $("atualizar").addEventListener("click", function () { carregar(lerSenha(), true); });
   $("sair").addEventListener("click", function () {
-    guardarSenha("");
+    esquecer();
     dados = null;
     $("senha").value = "";
     $("painel").hidden = true;
@@ -156,6 +177,14 @@
     if (tr && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); alternar(tr); }
   });
 
-  // Mantém o acesso enquanto a aba estiver aberta.
-  if (lerSenha()) carregar(lerSenha());
+  // Já entrou antes: mostra na hora os últimos dados guardados e atualiza por trás.
+  if (lerSenha()) {
+    try { dados = JSON.parse(ler(CHAVE_DADOS) || "null"); } catch (e) { dados = null; }
+    if (dados) {
+      $("entrar").hidden = true;
+      $("painel").hidden = false;
+      desenhar();
+    }
+    carregar(lerSenha());
+  }
 })();
