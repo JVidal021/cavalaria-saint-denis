@@ -31,13 +31,14 @@
     return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   }
 
-  function carregar(senha, fresco, lembrar) {
+  // acao: parâmetros extras para o servidor (divulgar resultados, avaliar ausência).
+  function carregar(senha, fresco, lembrar, acao) {
     var botao = document.querySelector("#entrar button");
     botao.disabled = true;
     botao.textContent = "Conferindo…";
-    carga(fresco ? "Buscando dados novos…" : "Atualizando…");
+    carga(acao ? "Salvando…" : fresco ? "Buscando dados novos…" : "Atualizando…");
     if (lembrar === undefined) lembrar = lembrado();
-    return fetch(API + "?painel=" + encodeURIComponent(senha) + (fresco ? "&fresco=1" : "") + "&t=" + Date.now(), { cache: "no-store" })
+    return fetch(API + "?painel=" + encodeURIComponent(senha) + (fresco ? "&fresco=1" : "") + (acao || "") + "&t=" + Date.now(), { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (r) {
         botao.disabled = false;
@@ -69,6 +70,8 @@
 
   function desenhar() {
     var res = dados.resultados.slice().sort(function (a, b) { return (b.quando || 0) - (a.quando || 0); });
+    desenharDivulgacao();
+    desenharAusencias();
 
     // Agenda
     var ag = dados.agenda;
@@ -129,6 +132,38 @@
     }).join("");
   }
 
+  // Divulgação: o Quadro de Honra público só mostra os aprovados depois deste botão.
+  function desenharDivulgacao() {
+    var sim = !!dados.divulgado;
+    $("divulgacao-texto").innerHTML = sim
+      ? 'Os aprovados estão <strong>publicados</strong> no <a href="resultados.html" target="_blank" rel="noopener">Quadro de Honra</a>.'
+      : 'Os resultados <strong>ainda não foram divulgados</strong>. O Quadro de Honra mostra "resultado ainda não divulgado".';
+    $("divulgar").textContent = sim ? "Ocultar resultados" : "Divulgar resultados";
+    $("divulgar").setAttribute("data-valor", sim ? "0" : "1");
+  }
+
+  function desenharAusencias() {
+    var lista = dados.ausencias || [];
+    var pend = lista.filter(function (a) { return a.situacao === "Pendente"; }).length;
+    $("ausencias-resumo").textContent = lista.length
+      ? lista.length + " pedido(s) · " + pend + " pendente(s)"
+      : "Nenhuma justificativa recebida.";
+    $("ausencias").innerHTML = lista.map(function (a) {
+      var classe = a.situacao === "Aceita" ? "ok" : a.situacao === "Recusada" ? "" : "pendente";
+      return '<li class="ausencia">' +
+        '<div class="ausencia-topo"><strong>' + esc(a.patente + " " + a.nome) + "</strong> · ID " + esc(a.id) +
+        (a.discord ? " · Discord " + esc(a.discord) : "") +
+        '<span class="stamp ' + classe + '">' + esc(a.situacao.toUpperCase()) + "</span></div>" +
+        '<p class="ausencia-meta">' + esc(a.aplicacao) + " · " + esc(a.motivo) + " · enviado em " + quando(a.quando) + "</p>" +
+        '<p class="ausencia-texto">' + esc(a.justificativa) + "</p>" +
+        '<p class="ausencia-acoes">' +
+        (a.situacao !== "Aceita" ? '<button type="button" class="btn-sec" data-linha="' + a.linha + '" data-situacao="Aceita">Aceitar</button>' : "") +
+        (a.situacao !== "Recusada" ? '<button type="button" class="btn-sec" data-linha="' + a.linha + '" data-situacao="Recusada">Recusar</button>' : "") +
+        (a.situacao !== "Pendente" ? '<button type="button" class="btn-sec" data-linha="' + a.linha + '" data-situacao="Pendente">Voltar a pendente</button>' : "") +
+        "</p></li>";
+    }).join("");
+  }
+
   function ficha(r) {
     var porTopico = {};
     r.respostas.forEach(function (x) { (porTopico[x.topico] = porTopico[x.topico] || []).push(x); });
@@ -160,6 +195,19 @@
     $("senha").value = "";
     $("painel").hidden = true;
     $("entrar").hidden = false;
+  });
+  $("divulgar").addEventListener("click", function () {
+    var valor = this.getAttribute("data-valor");
+    var msg = valor === "1"
+      ? "Publicar os nomes dos aprovados no Quadro de Honra do site?"
+      : "Tirar os nomes dos aprovados do Quadro de Honra?";
+    if (window.confirm(msg)) carregar(lerSenha(), false, undefined, "&divulgar=" + valor);
+  });
+  $("ausencias").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button[data-linha]");
+    if (!b) return;
+    b.disabled = true;
+    carregar(lerSenha(), false, undefined, "&ausencia=" + b.getAttribute("data-linha") + "&situacao=" + encodeURIComponent(b.getAttribute("data-situacao")));
   });
   $("busca").addEventListener("input", function () { if (dados) desenhar(); });
   $("filtro").addEventListener("change", function () { if (dados) desenhar(); });

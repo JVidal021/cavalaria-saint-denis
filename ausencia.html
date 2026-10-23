@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Justificativa de Ausência · Cavalaria SD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="avaliacao">
+<div class="sheet">
+<main>
+
+  <section class="hero">
+    <span class="kicker">Requerimento Oficial</span>
+    <h2>Justificativa de Ausência</h2>
+    <p class="hero-sub">Avaliação da Cavalaria</p>
+    <p class="lead">O oficial que não puder comparecer à aplicação da prova deve justificar a ausência aqui, de preferência com antecedência.</p>
+    <span data-ornament></span>
+  </section>
+
+  <div class="notice">
+    <span class="label">Atenção</span>
+    <p>A ausência sem justificativa poderá ser interpretada como falta de interesse em permanecer na corporação, podendo resultar em exoneração. Cada pedido é avaliado pelos instrutores.</p>
+  </div>
+
+  <div id="enviada" class="telegram" data-label="TELEGRAMA · JUSTIFICATIVA RECEBIDA" hidden>
+    <p id="enviada-texto"></p>
+  </div>
+
+  <form id="ausencia" novalidate>
+    <fieldset class="ficha">
+      <legend>Ficha do oficial</legend>
+      <div class="ficha-campos">
+        <div class="ficha-campo"><label for="a-nome">Nome completo do personagem</label><input id="a-nome" maxlength="80" autocomplete="off" required></div>
+        <div class="ficha-campo"><label for="a-id">ID fixo</label><input id="a-id" maxlength="30" autocomplete="off" required></div>
+        <div class="ficha-campo"><label for="a-patente">Patente</label><input id="a-patente" maxlength="40" autocomplete="off" required></div>
+        <div class="ficha-campo"><label for="a-discord">Discord <span class="opc">(opcional)</span></label><input id="a-discord" maxlength="60" autocomplete="off"></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="ficha">
+      <legend>A ausência</legend>
+      <div class="ficha-campos">
+        <div class="ficha-campo"><label for="a-aplicacao">Aplicação da prova</label>
+          <select id="a-aplicacao" required><option value="">Carregando datas…</option></select></div>
+        <div class="ficha-campo"><label for="a-motivo">Motivo</label>
+          <select id="a-motivo" required>
+            <option value="">Escolha…</option>
+            <option>Trabalho</option>
+            <option>Estudos</option>
+            <option>Saúde</option>
+            <option>Viagem</option>
+            <option>Problema de conexão</option>
+            <option>Compromisso familiar</option>
+            <option>Outro</option>
+          </select></div>
+      </div>
+      <div class="ficha-campo ficha-larga">
+        <label for="a-justificativa">Justificativa</label>
+        <textarea id="a-justificativa" rows="5" maxlength="1000" required placeholder="Explique o motivo da ausência."></textarea>
+        <span class="contagem" id="contagem">0/1000</span>
+      </div>
+    </fieldset>
+
+    <div class="enviar-area">
+      <p id="erro" class="notice" hidden></p>
+      <button type="submit" class="btn-enviar" id="btn-enviar">Enviar justificativa</button>
+    </div>
+  </form>
+
+  <p class="pager"><a href="avaliacao.html">← Prova de Conhecimento</a><a href="resultados.html">Quadro de Honra →</a></p>
+
+</main>
+</div>
+<script src="js/layout.js"></script>
+<script src="js/prova-data.js"></script>
+<script src="js/agenda.js"></script>
+<script src="js/ausencia.js"></script>
+</body>
+</html>
