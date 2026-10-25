@@ -54,7 +54,7 @@
         }
         guardar(senha, r, lembrar);
         dados = r;
-        carga("Atualizado às " + new Date(r.geradoEm || Date.now()).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }));
+        carga(r.aviso || "Atualizado às " + new Date(r.geradoEm || Date.now()).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }));
         $("entrar").hidden = true;
         $("painel").hidden = false;
         desenhar();
@@ -167,7 +167,15 @@
   function ficha(r) {
     var porTopico = {};
     r.respostas.forEach(function (x) { (porTopico[x.topico] = porTopico[x.topico] || []).push(x); });
-    var html = r.discord ? '<p class="ficha-discord">Discord: <strong>' + esc(r.discord) + "</strong></p>" : "";
+    var html = '<div class="corrigir">' +
+      (r.discord ? '<p class="ficha-discord">Discord: <strong>' + esc(r.discord) + "</strong></p>" : "<span></span>") +
+      '<button type="button" class="btn-sec" data-corrigir="' + r.linha + '">Corrigir dados</button></div>' +
+      '<form class="corrigir-form" data-linha="' + r.linha + '" data-antes="' + esc(r.nome) + '" hidden>' +
+      '<label>Nome<input name="nome" maxlength="80" value="' + esc(r.nome) + '" required></label>' +
+      '<label>ID fixo<input name="id" maxlength="30" value="' + esc(r.id) + '" required></label>' +
+      '<label>Patente<input name="patente" maxlength="40" value="' + esc(r.patente) + '" required></label>' +
+      '<span class="corrigir-botoes"><button type="submit" class="btn-sec">Salvar</button>' +
+      '<button type="button" class="btn-sec" data-cancelar>Cancelar</button></span></form>';
     dados.topicos.forEach(function (t) {
       var itens = porTopico[t];
       if (!itens) return;
@@ -217,8 +225,35 @@
     desenhar();
   }
   $("oficiais").addEventListener("click", function (ev) {
+    var abrir = ev.target.closest("[data-corrigir]");
+    if (abrir) {
+      var form = abrir.closest("td").querySelector(".corrigir-form");
+      form.hidden = false;
+      abrir.hidden = true;
+      form.querySelector("input").focus();
+      return;
+    }
+    if (ev.target.closest("[data-cancelar]")) {
+      var f = ev.target.closest(".corrigir-form");
+      f.hidden = true;
+      f.closest("td").querySelector("[data-corrigir]").hidden = false;
+      return;
+    }
     var tr = ev.target.closest("tr.oficial");
     if (tr) alternar(tr);
+  });
+  // Corrige nome, ID e patente na planilha (o servidor confere se a linha ainda é do mesmo oficial).
+  $("oficiais").addEventListener("submit", function (ev) {
+    var f = ev.target.closest(".corrigir-form");
+    if (!f) return;
+    ev.preventDefault();
+    var v = function (n) { return f.elements[n].value.trim(); };
+    if (!v("nome") || !v("id") || !v("patente")) { carga("Nome, ID e patente não podem ficar vazios."); return; }
+    f.querySelector("button[type=submit]").disabled = true;
+    aberto = null;
+    carregar(lerSenha(), false, undefined, "&editar=" + f.getAttribute("data-linha") +
+      "&antes=" + encodeURIComponent(f.getAttribute("data-antes")) + "&nome=" + encodeURIComponent(v("nome")) +
+      "&id=" + encodeURIComponent(v("id")) + "&patente=" + encodeURIComponent(v("patente")));
   });
   $("oficiais").addEventListener("keydown", function (ev) {
     var tr = ev.target.closest("tr.oficial");

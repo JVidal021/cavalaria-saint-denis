@@ -846,3 +846,10 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
 .ausencia-meta { margin: 4px 0; color: var(--ink-soft); font-size: .95rem; }
 .ausencia-texto { margin: 6px 0; white-space: pre-wrap; }
 .ausencia-acoes { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 0; }
+
+/* ---------- Painel: corrigir dados do oficial ---------- */
+.corrigir { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.corrigir-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin: 10px 0 4px; padding: 10px 12px; border: 1px dashed var(--brass); background: rgba(169, 124, 47, .08); }
+.corrigir-form label { display: flex; flex-direction: column; gap: 2px; font-variant: small-caps; letter-spacing: .08em; font-weight: 700; color: var(--ink-soft); flex: 1 1 160px; }
+.corrigir-form input { font: inherit; font-variant: normal; letter-spacing: 0; font-weight: 400; color: var(--ink); padding: 5px 8px; border: 1px solid var(--ink-soft); background: var(--paper-light); }
+.corrigir-botoes { display: flex; gap: 8px; }
