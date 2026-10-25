@@ -151,7 +151,7 @@
       return aus.filter(function (a) { return (chave(o.id) && chave(a.id) === chave(o.id)) || chave(a.nome) === chave(o.nome); })[0] || null;
     }
     if (!efetivo.length) {
-      $("presenca-ajuda").innerHTML = "Para ver quem <strong>faltou sem justificativa</strong>, preencha a aba <strong>Efetivo</strong> da planilha com nome, ID fixo e patente de todos os oficiais. Depois clique em Atualizar.";
+      $("presenca-ajuda").innerHTML = "Ainda ninguém no <strong>Efetivo</strong>. Ele se preenche sozinho com quem envia prova ou justificativa; acrescente à mão, na aba Efetivo da planilha, quem nunca enviou nada.";
       $("presenca").innerHTML = "";
       $("n-faltosos").textContent = "";
       return;
@@ -169,7 +169,9 @@
       .filter(function (r) { return !noEfetivo[chave(r.id)] && !noEfetivo[chave(r.nome)]; });
     $("n-faltosos").textContent = faltou.length || "";
     $("n-faltosos").classList.toggle("alerta", faltou.length > 0);
-    $("presenca-ajuda").innerHTML = "Efetivo com <strong>" + efetivo.length + "</strong> oficiais, conforme a aba Efetivo da planilha.";
+    $("presenca-ajuda").innerHTML = "Efetivo com <strong>" + efetivo.length + "</strong> oficiais, conforme a aba Efetivo da planilha." +
+      (dados.efetivoIncluidos ? " <strong>" + dados.efetivoIncluidos + "</strong> entraram agora, a partir das provas e ausências enviadas." : "") +
+      " Quem envia prova ou justificativa entra sozinho; corrija ou acrescente à mão na planilha quem nunca enviou nada.";
     function nome(o) { return esc((o.patente ? o.patente + " " : "") + o.nome) + (o.id ? ' <span class="cinza">· ID ' + esc(o.id) + "</span>" : ""); }
     function grupo(titulo, classe, itens, linha, botao) {
       return '<section class="grupo ' + classe + '"><h4>' + titulo + " <span>(" + itens.length + ")</span>" + (botao || "") + "</h4>" +
