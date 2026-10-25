@@ -42,36 +42,69 @@
       </p>
     </div>
 
-    <div class="placar" id="placar"></div>
+    <nav class="abas" role="tablist" aria-label="Seções do painel">
+      <button type="button" role="tab" class="aba" id="aba-resumo" data-aba="resumo">Resumo</button>
+      <button type="button" role="tab" class="aba" id="aba-oficiais" data-aba="oficiais">Oficiais <span class="contador-aba" id="n-oficiais"></span></button>
+      <button type="button" role="tab" class="aba" id="aba-ausencias" data-aba="ausencias">Ausências <span class="contador-aba" id="n-ausencias"></span></button>
+    </nav>
 
-    <div class="divulgacao">
-      <p id="divulgacao-texto"></p>
-      <button type="button" class="btn-sec" id="divulgar">Divulgar resultados</button>
+    <div class="painel-aba" data-painel="resumo">
+      <div class="placar" id="placar"></div>
+
+      <div class="divulgacao">
+        <p id="divulgacao-texto"></p>
+        <button type="button" class="btn-sec" id="divulgar">Divulgar resultados</button>
+      </div>
+
+      <h3 class="section">Acertos por tópico</h3>
+      <div class="topicos" id="topicos"></div>
+
+      <h3 class="section">Questões mais erradas</h3>
+      <ol class="mais-erradas" id="mais-erradas"></ol>
     </div>
 
-    <h3 class="section">Acertos por tópico</h3>
-    <div class="topicos" id="topicos"></div>
-
-    <h3 class="section">Oficiais avaliados</h3>
-    <div class="filtros">
-      <input type="search" id="busca" placeholder="Buscar por nome, ID ou patente">
-      <select id="filtro">
-        <option value="todos">Todos</option>
-        <option value="aprovados">Aprovados</option>
-        <option value="reprovados">Reprovados</option>
-      </select>
+    <div class="painel-aba" data-painel="oficiais">
+      <div class="filtros">
+        <input type="search" id="busca" placeholder="Buscar por nome, ID ou patente">
+        <select id="filtro">
+          <option value="todos">Todos</option>
+          <option value="aprovados">Aprovados</option>
+          <option value="reprovados">Reprovados</option>
+          <option value="repetidos">Com mais de uma tentativa</option>
+        </select>
+        <label class="lembrar filtro-check"><input type="checkbox" id="ocultar-testes" checked> Ocultar testes</label>
+        <button type="button" class="btn-sec" id="copiar-aprovados">Copiar aprovados</button>
+      </div>
+      <div class="table-wrap">
+        <table class="tabela-oficiais">
+          <thead><tr>
+            <th><button type="button" class="ordenar" data-ordem="nome">Oficial</button></th>
+            <th><button type="button" class="ordenar" data-ordem="id">ID</button></th>
+            <th><button type="button" class="ordenar" data-ordem="patente">Patente</button></th>
+            <th><button type="button" class="ordenar" data-ordem="quando">Enviado em</button></th>
+            <th style="text-align:right">Acertos</th>
+            <th style="text-align:right"><button type="button" class="ordenar" data-ordem="nota">Nota</button></th>
+            <th>Resultado</th>
+          </tr></thead>
+          <tbody id="oficiais"></tbody>
+        </table>
+      </div>
+      <p id="vazio" class="telegram" data-label="AVISO" hidden>Nenhuma prova encontrada.</p>
+      <textarea id="copia-reserva" class="copia-reserva" readonly hidden aria-label="Lista de aprovados para copiar"></textarea>
     </div>
-    <div class="table-wrap">
-      <table class="tabela-oficiais">
-        <thead><tr><th>Oficial</th><th>ID</th><th>Patente</th><th>Enviado em</th><th style="text-align:right">Acertos</th><th style="text-align:right">Nota</th><th>Resultado</th></tr></thead>
-        <tbody id="oficiais"></tbody>
-      </table>
-    </div>
-    <p id="vazio" class="telegram" data-label="AVISO" hidden>Nenhuma prova encontrada.</p>
 
-    <h3 class="section">Justificativas de ausência</h3>
-    <p class="ausencias-resumo" id="ausencias-resumo"></p>
-    <ol class="ausencias" id="ausencias"></ol>
+    <div class="painel-aba" data-painel="ausencias">
+      <div class="filtros">
+        <select id="filtro-ausencias">
+          <option value="todas">Todas</option>
+          <option value="Pendente">Pendentes</option>
+          <option value="Aceita">Aceitas</option>
+          <option value="Recusada">Recusadas</option>
+        </select>
+        <p class="ausencias-resumo" id="ausencias-resumo"></p>
+      </div>
+      <ol class="ausencias" id="ausencias"></ol>
+    </div>
   </section>
 
 </main>

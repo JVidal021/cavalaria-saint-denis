@@ -853,3 +853,31 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
 .corrigir-form label { display: flex; flex-direction: column; gap: 2px; font-variant: small-caps; letter-spacing: .08em; font-weight: 700; color: var(--ink-soft); flex: 1 1 160px; }
 .corrigir-form input { font: inherit; font-variant: normal; letter-spacing: 0; font-weight: 400; color: var(--ink); padding: 5px 8px; border: 1px solid var(--ink-soft); background: var(--paper-light); }
 .corrigir-botoes { display: flex; gap: 8px; }
+
+/* ---------- Painel: abas, ordenação, alertas ---------- */
+.abas { display: flex; gap: 4px; margin: 20px 0 0; border-bottom: 2px solid var(--ink); flex-wrap: wrap; }
+.aba { font: inherit; font-variant: small-caps; letter-spacing: .1em; font-weight: 700; font-size: 1.02rem; cursor: pointer;
+  color: var(--ink-soft); background: transparent; border: 1px solid transparent; border-bottom: 0; padding: 8px 16px 6px; margin-bottom: -2px; }
+.aba:hover { color: var(--ink); }
+.aba.ativa { color: var(--ink); background: rgba(255, 248, 228, .65); border-color: var(--ink); border-bottom: 2px solid #f1e3c4; }
+.aba:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+.contador-aba { display: inline-block; min-width: 1.4em; padding: 0 5px; margin-left: 4px; font-variant: normal; font-size: .8rem; line-height: 1.4;
+  text-align: center; border-radius: 9px; background: rgba(43, 29, 18, .12); color: var(--ink); }
+.contador-aba:empty { display: none; }
+.contador-aba.alerta { background: var(--blood); color: var(--paper-light); }
+.painel-aba { padding-top: 6px; }
+.ordenar { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; letter-spacing: inherit; }
+.ordenar:hover, .ordenar.ativo { text-decoration: underline; text-underline-offset: 3px; }
+.ordenar[data-seta]:not([data-seta=""])::after { content: " " attr(data-seta); font-size: .75em; }
+.ordenar:focus-visible { outline: 2px solid var(--brass-light); outline-offset: 2px; }
+.selo-alerta { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--blood);
+  border: 1px solid var(--blood); padding: 0 5px; margin-left: 4px; vertical-align: middle; }
+.filtro-check { margin: 0 !important; align-self: center; }
+.mais-erradas { padding-left: 22px; margin: 8px 0 4px; }
+.mais-erradas li { margin: 0 0 10px; }
+.mais-erradas .pergunta { font-weight: 700; margin: 0; }
+.mais-erradas .resp { margin: 2px 0 0; color: var(--ink-soft); }
+.mais-erradas .vazio, .ausencias .vazio { list-style: none; color: var(--ink-soft); font-style: italic; }
+.ausencia.duplicada { border-color: var(--blood); }
+.ausencia-aviso { margin: 6px 0; padding: 6px 10px; background: rgba(122, 31, 20, .09); border-left: 3px solid var(--blood); }
+.copia-reserva { width: 100%; min-height: 160px; margin-top: 10px; font: inherit; padding: 8px; }
