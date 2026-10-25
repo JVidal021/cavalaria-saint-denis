@@ -72,16 +72,44 @@
   var envio = ler(CHAVE_ENVIO);
   if (envio) { mostrarEnviada(envio); return; }
 
-  // As questões só chegam se a prova estiver aberta na agenda.
-  Agenda.consultar(true).then(function (e) {
-    if (!e.aberta || !e.modulos) { fechada(Agenda.descrever(e)); return; }
-    MODULOS = sortear(e.modulos, e.sorteio || P.sorteio);
-    total = MODULOS.reduce(function (n, m) { return n + m.questoes.length; }, 0);
+  // As questões só chegam se a prova estiver aberta na agenda (e, na recuperação, se o ID foi convocado).
+  var idRecuperacao = "";
+  function buscar(id) {
+    return Agenda.consultar(true, id).then(function (e) {
+      if (!e.aberta) { fechada(Agenda.descrever(e)); return; }
+      if (e.restrita && !e.permitido) { pedirId(e, !!id); return; }
+      if (!e.modulos) { fechada(Agenda.descrever(e)); return; }
+      idRecuperacao = id || "";
+      $("recuperacao-id").hidden = true;
+      MODULOS = sortear(e.modulos, e.sorteio || P.sorteio);
+      total = MODULOS.reduce(function (n, m) { return n + m.questoes.length; }, 0);
+      statusTexto.innerHTML = Agenda.descrever(e);
+      montar();
+    }).catch(function () {
+      fechada("Não foi possível consultar a agenda da prova. Verifique sua internet e recarregue a página.");
+    });
+  }
+  // Recuperação: pede o ID fixo antes de entregar as questões.
+  function pedirId(e, recusado) {
     statusTexto.innerHTML = Agenda.descrever(e);
-    montar();
-  }).catch(function () {
-    fechada("Não foi possível consultar a agenda da prova. Verifique sua internet e recarregue a página.");
+    var caixa = $("recuperacao-id");
+    caixa.hidden = false;
+    $("recuperacao-erro").hidden = !recusado;
+    var botao = caixa.querySelector("button");
+    botao.disabled = false;
+    botao.textContent = "Continuar";
+  }
+  $("recuperacao-id").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var id = $("rec-id").value.trim();
+    if (!id) return;
+    var botao = this.querySelector("button");
+    botao.disabled = true;
+    botao.textContent = "Conferindo…";
+    buscar(id);
   });
+  function $(id) { return document.getElementById(id); }
+  buscar();
 
   function fechada(msg) {
     status.setAttribute("data-label", "AVISO DA CENTRAL · PROVA FECHADA");
@@ -101,6 +129,7 @@
     campo.appendChild(el("label", { "for": id }, esc(c.rotulo) + (c.obrigatorio ? "" : ' <span class="opc">(opcional)</span>')));
     var input = el("input", { type: "text", id: id, name: "entry." + c.entry, autocomplete: "off" });
     if (c.obrigatorio) input.required = true;
+    if (c.rotulo === "ID fixo" && idRecuperacao) { input.value = idRecuperacao; input.readOnly = true; }
     campo.appendChild(input);
     ident.appendChild(campo);
   });

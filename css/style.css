@@ -881,3 +881,79 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
 .ausencia.duplicada { border-color: var(--blood); }
 .ausencia-aviso { margin: 6px 0; padding: 6px 10px; background: rgba(122, 31, 20, .09); border-left: 3px solid var(--blood); }
 .copia-reserva { width: 100%; min-height: 160px; margin-top: 10px; font: inherit; padding: 8px; }
+
+/* ---------- Painel: gestão (presença, recuperação, avaliação, registro) ---------- */
+.cinza { color: var(--ink-soft); font-style: italic; font-weight: 400; }
+.autor { display: inline-flex; align-items: center; gap: 6px; font-variant: small-caps; letter-spacing: .08em; font-weight: 700; color: var(--ink-soft); }
+.autor input { font: inherit; font-variant: normal; letter-spacing: 0; font-weight: 400; width: 150px; padding: 4px 8px; border: 1px solid var(--ink-soft); background: var(--paper-light); color: var(--ink); }
+.presenca-ajuda { color: var(--ink-soft); margin: 10px 0; }
+.presenca { display: grid; gap: 12px; }
+.grupo { border: 1px solid var(--rule); background: rgba(255, 248, 228, .45); padding: 10px 14px; }
+.grupo h4 { margin: 0 0 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.grupo h4 span { color: var(--ink-soft); font-weight: 400; }
+.grupo h4 .btn-sec { margin-left: auto; }
+.grupo ul { margin: 0; padding-left: 20px; columns: 2; column-gap: 28px; }
+.grupo li { break-inside: avoid; margin: 2px 0; }
+.grupo.faltou { border-color: var(--blood); }
+.grupo.faltou h4 { color: var(--blood); }
+.recuperacao { margin: 14px 0 6px; border: 1px dashed var(--brass); background: rgba(169, 124, 47, .07); padding: 8px 14px; }
+.recuperacao summary { cursor: pointer; font-variant: small-caps; letter-spacing: .1em; font-weight: 700; }
+.recuperacao summary span { font-variant: normal; letter-spacing: 0; font-weight: 400; color: var(--ink-soft); }
+.recuperacao-campos { display: flex; gap: 10px; flex-wrap: wrap; }
+.recuperacao-campos label, .avaliacao-final label { display: flex; flex-direction: column; gap: 2px; font-variant: small-caps; letter-spacing: .08em; font-weight: 700; color: var(--ink-soft); }
+.recuperacao-campos .largo, .avaliacao-final .largo { flex: 1 1 260px; }
+.recuperacao-campos input, .recuperacao-campos textarea, .avaliacao-final select, .avaliacao-final textarea, .oral select {
+  font: inherit; font-variant: normal; letter-spacing: 0; font-weight: 400; padding: 5px 8px; border: 1px solid var(--ink-soft); background: var(--paper-light); color: var(--ink); }
+.recuperacao-botoes { display: flex; gap: 8px; flex-wrap: wrap; }
+.padrinhos { padding-left: 20px; margin: 4px 0 6px; }
+.ficha-botoes { display: flex; gap: 8px; flex-wrap: wrap; }
+.historico ul { margin: 4px 0 8px; padding-left: 20px; }
+.avaliacao { margin: 10px 0; border: 1px solid var(--rule); background: rgba(255, 248, 228, .5); padding: 8px 12px; }
+.avaliacao summary { cursor: pointer; }
+.orais { list-style: none; padding: 0; margin: 8px 0; }
+.oral-grupo { font-variant: small-caps; letter-spacing: .12em; font-weight: 700; color: var(--blood); margin: 10px 0 2px; }
+.oral { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; padding: 6px 0; border-bottom: 1px dashed var(--rule); }
+.oral p { margin: 0; }
+.oral details summary { font-size: .9rem; color: var(--ink-soft); cursor: pointer; }
+.oral details p { font-size: .95rem; color: var(--ink-soft); margin-top: 4px; }
+.avaliacao-final { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0; }
+.situacao-final { display: block; font-size: .78rem; color: var(--ink-soft); margin-top: 4px; }
+.respostas-titulo { margin-top: 14px; }
+.registro { list-style: none; padding: 0; margin: 0; }
+.registro li { padding: 6px 0; border-bottom: 1px solid var(--rule); }
+@media (max-width: 820px) { .grupo ul { columns: 1; } .oral { grid-template-columns: 1fr; } }
+
+/* ---------- Simulado ---------- */
+.simulado-controles { align-items: center; }
+.simulado-placar { text-align: center; font-variant: small-caps; letter-spacing: .1em; color: var(--ink-soft); }
+.simulado { list-style: none; padding: 0; margin: 0; }
+.sim-q { margin: 14px 0; }
+.sim-pergunta { font-weight: 700; font-size: 1.1rem; margin: 2px 0 8px; }
+.sim-opcao { width: 100%; text-align: left; font: inherit; color: inherit; background: none; }
+.sim-opcao:disabled { cursor: default; opacity: 1; }
+.sim-opcao.acertou { background: rgba(74, 107, 58, .16); border-color: #4a6b3a; }
+.sim-opcao.acertou .letra { background: #4a6b3a; border-color: #4a6b3a; color: #fff; }
+.sim-opcao.errou { background: rgba(122, 31, 20, .1); border-color: var(--blood); }
+.sim-opcao.errou .letra { background: var(--blood); border-color: var(--blood); color: #fff; }
+.sim-explica { margin: 8px 0 0; padding: 8px 12px; border-left: 3px solid var(--brass); background: rgba(169, 124, 47, .08); }
+
+/* ---------- Consulta rápida ---------- */
+.busca { margin: 6px 0 22px; padding: 14px 16px; border: 2px solid var(--ink); outline: 1px solid var(--ink); outline-offset: -6px; background: rgba(255, 248, 228, .45); }
+.busca label { display: block; font-variant: small-caps; letter-spacing: .12em; font-weight: 700; color: var(--blood); margin-bottom: 6px; }
+.busca input { width: 100%; font: inherit; font-size: 1.1rem; padding: 8px 10px; border: 1px solid var(--ink); background: var(--paper-light); color: var(--ink); }
+.busca p { margin: 6px 0 0; }
+.busca-resultados { list-style: none; padding: 0; margin: 8px 0 0; }
+.busca-resultados li { padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.busca-resultados a { text-decoration: none; color: var(--blood); }
+.busca-resultados a:hover { text-decoration: underline; }
+.busca-resultados p { margin: 2px 0 0; color: var(--ink-soft); font-size: .98rem; }
+.busca-resultados mark { background: rgba(212, 171, 90, .55); color: inherit; padding: 0 1px; }
+.cola { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.cola-card { border: 1px solid var(--ink); background: rgba(255, 248, 228, .5); padding: 12px 16px; min-width: 0; }
+.cola-card h4 { margin: 0 0 8px; }
+.cola-card table { font-size: .98rem; margin: 0; }
+.cola-card td:first-child { white-space: normal; }
+.cola-larga { grid-column: 1 / -1; }
+.cola-alerta { margin: 8px 0 0; padding: 6px 10px; border-left: 3px solid var(--blood); background: rgba(122, 31, 20, .07); font-size: .95rem; }
+.cola-passos { padding-left: 20px; margin: 4px 0 8px; }
+.cola-card .cinza { margin: 6px 0 0; font-size: .95rem; }

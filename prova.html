@@ -27,6 +27,15 @@
     <p id="prova-status-texto">Consultando a agenda da prova…</p>
   </div>
 
+  <form id="recuperacao-id" class="cofre" hidden>
+    <label for="rec-id">Seu ID fixo</label>
+    <div class="cofre-linha">
+      <input id="rec-id" maxlength="30" autocomplete="off" required>
+      <button type="submit" class="btn-enviar">Continuar</button>
+    </div>
+    <p id="recuperacao-erro" class="notice" hidden><span class="label">Não convocado</span>Este ID não está na lista desta recuperação. Confira o número ou procure um instrutor.</p>
+  </form>
+
   <div id="prova-enviada" class="telegram" data-label="TELEGRAMA · PROVA RECEBIDA" hidden>
     <p id="prova-enviada-texto">Sua prova foi recebida pela Cavalaria. O resultado será divulgado pelo instrutor.</p>
   </div>

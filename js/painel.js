@@ -4,6 +4,13 @@
   var CHAVE_SENHA = "cavalaria-painel-senha";
   var CHAVE_DADOS = "cavalaria-painel-dados";
   var CHAVE_ABA = "cavalaria-painel-aba";
+  var CHAVE_AUTOR = "cavalaria-painel-autor";
+  var PAGINAS = {
+    "Código de Conduta": "conduta.html", "MDT · Prancheta": "prancheta.html", "Patrulha e Abordagem": "patrulha.html",
+    "Negociação": "negociacao.html", "Liderança de Patrulha": "lideranca.html"
+  };
+  var SITUACOES = ["Pendente de avaliação individual", "Cursos iniciais concluídos", "Em recuperação", "Reprovado"];
+  var ROTULO_ORAL = { completa: "Completa", parcial: "Parcial", nao: "Não soube" };
   var dados = null;
   var aberto = null; // linha do oficial expandida
   var ordem = { campo: "quando", desc: true };
@@ -32,6 +39,28 @@
     try { [localStorage, sessionStorage].forEach(function (a) { a.removeItem(CHAVE_SENHA); a.removeItem(CHAVE_DADOS); }); } catch (e) {}
   }
   function carga(texto) { $("carga").textContent = texto || ""; }
+  function autor() { try { return localStorage.getItem(CHAVE_AUTOR) || ""; } catch (e) { return ""; } }
+  function urlSite(pagina) { return new URL(pagina, location.href).href; }
+  function copiar(texto, botao, rotulo) {
+    function feito() { botao.textContent = "Copiado!"; setTimeout(function () { botao.textContent = rotulo; }, 1800); }
+    function reserva() {
+      var t = $("copia-reserva");
+      t.value = texto; t.hidden = false; t.focus(); t.select();
+      botao.textContent = "Selecione e copie";
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(feito, reserva);
+    else reserva();
+  }
+  // Melhor tentativa de cada oficial (pelo ID, ou pelo nome se faltar ID).
+  function melhores(res) {
+    var m = {};
+    res.forEach(function (r) { var k = idOficial(r); if (!m[k] || r.nota > m[k].nota) m[k] = r; });
+    return m;
+  }
+  function avaliacaoDe(r) {
+    var id = chave(r.id);
+    return (dados.avaliacoes || []).filter(function (a) { return chave(a.id) === id && id; })[0] || null;
+  }
   function quando(ms) {
     if (!ms) return "—";
     var d = new Date(ms);
@@ -45,7 +74,8 @@
     botao.textContent = "Conferindo…";
     carga(acao ? "Salvando…" : fresco ? "Buscando dados novos…" : "Atualizando…");
     if (lembrar === undefined) lembrar = lembrado();
-    return fetch(API + "?painel=" + encodeURIComponent(senha) + (fresco ? "&fresco=1" : "") + (acao || "") + "&t=" + Date.now(), { cache: "no-store" })
+    var extra = acao ? acao + "&autor=" + encodeURIComponent(autor() || "Instrutor") : "";
+    return fetch(API + "?painel=" + encodeURIComponent(senha) + (fresco ? "&fresco=1" : "") + extra + "&t=" + Date.now(), { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (r) {
         botao.disabled = false;
@@ -104,6 +134,165 @@
     desenharDivulgacao();
     desenharOficiais(res, tentativas);
     desenharAusencias(res);
+    desenharPresenca(res);
+    desenharRecuperacao(res);
+    desenharRegistro();
+  }
+
+  // ---------- Presença: efetivo × provas × ausências ----------
+  function desenharPresenca(res) {
+    var efetivo = dados.efetivo || [];
+    var aus = dados.ausencias || [];
+    var m = melhores(res);
+    function provaDe(o) {
+      return m[chave(o.id)] || res.filter(function (r) { return chave(r.nome) === chave(o.nome); })[0] || null;
+    }
+    function ausenciaDe(o) {
+      return aus.filter(function (a) { return (chave(o.id) && chave(a.id) === chave(o.id)) || chave(a.nome) === chave(o.nome); })[0] || null;
+    }
+    if (!efetivo.length) {
+      $("presenca-ajuda").innerHTML = "Para ver quem <strong>faltou sem justificativa</strong>, preencha a aba <strong>Efetivo</strong> da planilha com nome, ID fixo e patente de todos os oficiais. Depois clique em Atualizar.";
+      $("presenca").innerHTML = "";
+      $("n-faltosos").textContent = "";
+      return;
+    }
+    var fez = [], justificou = [], faltou = [];
+    efetivo.forEach(function (o) {
+      var p = provaDe(o), a = ausenciaDe(o);
+      if (p) fez.push({ o: o, p: p });
+      else if (a) justificou.push({ o: o, a: a });
+      else faltou.push({ o: o });
+    });
+    var noEfetivo = {};
+    efetivo.forEach(function (o) { noEfetivo[chave(o.id)] = 1; noEfetivo[chave(o.nome)] = 1; });
+    var fora = Object.keys(m).map(function (k) { return m[k]; })
+      .filter(function (r) { return !noEfetivo[chave(r.id)] && !noEfetivo[chave(r.nome)]; });
+    $("n-faltosos").textContent = faltou.length || "";
+    $("n-faltosos").classList.toggle("alerta", faltou.length > 0);
+    $("presenca-ajuda").innerHTML = "Efetivo com <strong>" + efetivo.length + "</strong> oficiais, conforme a aba Efetivo da planilha.";
+    function nome(o) { return esc((o.patente ? o.patente + " " : "") + o.nome) + (o.id ? ' <span class="cinza">· ID ' + esc(o.id) + "</span>" : ""); }
+    function grupo(titulo, classe, itens, linha, botao) {
+      return '<section class="grupo ' + classe + '"><h4>' + titulo + " <span>(" + itens.length + ")</span>" + (botao || "") + "</h4>" +
+        (itens.length ? "<ul>" + itens.map(linha).join("") + "</ul>" : '<p class="cinza">Ninguém.</p>') + "</section>";
+    }
+    $("presenca").innerHTML =
+      grupo("Faltou sem justificativa", "faltou", faltou, function (x) { return "<li>" + nome(x.o) + "</li>"; },
+        faltou.length ? ' <button type="button" class="btn-sec" id="copiar-faltosos">Copiar lista</button>' : "") +
+      grupo("Justificou a ausência", "justificou", justificou, function (x) {
+        return "<li>" + nome(x.o) + ' · <span class="stamp ' + (x.a.situacao === "Aceita" ? "ok" : x.a.situacao === "Recusada" ? "" : "pendente") + '">' + esc(x.a.situacao.toUpperCase()) + "</span></li>";
+      }) +
+      grupo("Fez a prova", "fez", fez, function (x) {
+        return "<li>" + nome(x.o) + " · " + x.p.nota + '% <span class="stamp ' + (x.p.aprovado ? "ok" : "") + '">' + (x.p.aprovado ? "APROVADO" : "REPROVADO") + "</span></li>";
+      }) +
+      (fora.length ? grupo("Fez a prova, mas não está no Efetivo", "fora", fora, function (r) {
+        return "<li>" + nome(r) + " · " + r.nota + "%</li>";
+      }) : "");
+    window.__faltosos = faltou.map(function (x) { return "• " + (x.o.patente ? x.o.patente + " " : "") + x.o.nome + (x.o.id ? " (ID " + x.o.id + ")" : ""); }).join("\n");
+  }
+
+  // ---------- Recuperação e padrinhos ----------
+  function pendentesDeAprovacao(res) {
+    var m = melhores(res);
+    return Object.keys(m).map(function (k) { return m[k]; }).filter(function (r) { return !r.aprovado; });
+  }
+  function padrinhos(res) {
+    var m = melhores(res);
+    var aprovados = Object.keys(m).map(function (k) { return m[k]; }).filter(function (r) { return r.aprovado; })
+      .sort(function (a, b) { return b.nota - a.nota; });
+    var uso = {};
+    return pendentesDeAprovacao(res).map(function (r) {
+      var candidatos = aprovados.filter(function (a) { return chave(a.patente) === chave(r.patente); });
+      if (!candidatos.length) candidatos = aprovados;
+      candidatos = candidatos.slice().sort(function (a, b) { return (uso[idOficial(a)] || 0) - (uso[idOficial(b)] || 0) || b.nota - a.nota; });
+      var p = candidatos[0] || null;
+      if (p) uso[idOficial(p)] = (uso[idOficial(p)] || 0) + 1;
+      return { aluno: r, padrinho: p };
+    });
+  }
+  function desenharRecuperacao(res) {
+    var pend = pendentesDeAprovacao(res);
+    $("n-recuperacao").textContent = pend.length ? "· " + pend.length + " oficial(is) sem aprovação" : "· todos aprovados";
+    if (!$("rec-ids").dataset.editado) $("rec-ids").value = pend.map(function (r) { return r.id; }).filter(String).join(", ");
+    if (!$("rec-inicio").value) {
+      var d = new Date(); d.setDate(d.getDate() + 1); d.setHours(20, 0, 0, 0);
+      var f = new Date(d.getTime() + 36e5);
+      var iso = function (x) { return new Date(x.getTime() - x.getTimezoneOffset() * 6e4).toISOString().slice(0, 16); };
+      $("rec-inicio").value = iso(d); $("rec-fim").value = iso(f);
+    }
+    var pares = padrinhos(res);
+    $("padrinhos").innerHTML = pares.length ? pares.map(function (x) {
+      return "<li><strong>" + esc(x.aluno.patente + " " + x.aluno.nome) + "</strong> (" + x.aluno.nota + "%) → " +
+        (x.padrinho ? esc(x.padrinho.patente + " " + x.padrinho.nome) + " (" + x.padrinho.nota + "%)" : "sem aprovado disponível") + "</li>";
+    }).join("") : '<li class="cinza">Ninguém precisa de padrinho: todos foram aprovados.</li>';
+  }
+
+  // ---------- Registro de ações ----------
+  function desenharRegistro() {
+    var lista = dados.registro || [];
+    $("registro").innerHTML = lista.length ? lista.map(function (x) {
+      return '<li><span class="cinza">' + quando(x.quando) + "</span> · <strong>" + esc(x.autor) + "</strong> · " + esc(x.acao) +
+        (x.detalhe ? ' <span class="cinza">— ' + esc(x.detalhe) + "</span>" : "") + "</li>";
+    }).join("") : '<li class="cinza">Nenhuma ação registrada ainda.</li>';
+  }
+
+  // ---------- Plano de estudo individual ----------
+  function planoDeEstudo(r) {
+    var porTopico = {};
+    r.respostas.forEach(function (x) {
+      var t = porTopico[x.topico] = porTopico[x.topico] || { certas: 0, total: 0 };
+      t.total++; if (x.certo) t.certas++;
+    });
+    var fracos = Object.keys(porTopico).map(function (k) { return { nome: k, c: porTopico[k].certas, t: porTopico[k].total }; })
+      .filter(function (x) { return x.c < x.t; })
+      .sort(function (a, b) { return a.c / a.t - b.c / b.t; });
+    var ag = (dados.agenda.janelas || []).filter(function (j) {
+      return j.fim > Date.now() && (!j.ids || !j.ids.length || j.ids.indexOf(chave(r.id)) >= 0);
+    }).sort(function (a, b) { return a.inicio - b.inicio; })[0];
+    return "📘 **Plano de estudo — " + r.patente + " " + r.nome + "**\n\n" +
+      "Na Prova de Conhecimento você acertou " + r.acertos + " de " + r.recebidas + " (" + r.nota + "%). " +
+      (r.aprovado ? "Você foi aprovado, mas vale reforçar:" : "A nota mínima é " + dados.notaMinima + "%. Para a recuperação, reforce:") + "\n" +
+      (fracos.length ? fracos.map(function (x) {
+        return "• **" + x.nome + "** — acertou " + x.c + " de " + x.t + " → " + urlSite(PAGINAS[x.nome] || "index.html");
+      }).join("\n") : "• Nenhum tópico com erro. Parabéns!") + "\n\n" +
+      "Treine no simulado (não conta nota): " + urlSite("simulado.html") + "\n" +
+      "Consulta rápida: " + urlSite("consulta.html") + "\n" +
+      (ag ? "\nPróxima aplicação: " + quando(ag.inicio) + "." : "\nA data da recuperação será informada pelos instrutores.") +
+      "\n\nQualquer dúvida, procure um instrutor. Disciplina, preparo e compromisso com o dever.";
+  }
+
+  // ---------- Avaliação individual (formulário dentro da ficha) ----------
+  function formAvaliacao(r) {
+    var av = avaliacaoDe(r) || { orais: {}, situacao: SITUACOES[0], obs: "" };
+    var orais = dados.orais || [];
+    var grupoAtual = null;
+    var itens = orais.map(function (o, i) {
+      var cab = o.m !== grupoAtual ? '<li class="oral-grupo">' + esc(o.m) + "</li>" : "";
+      grupoAtual = o.m;
+      var v = av.orais[i] || "";
+      return cab + '<li class="oral"><div><p>' + esc(o.q) + '</p><details><summary>Resposta esperada</summary><p>' + esc(o.r) + "</p></details></div>" +
+        '<select name="oral-' + i + '" aria-label="Resultado da pergunta">' +
+        ['<option value="">—</option>'].concat(["completa", "parcial", "nao"].map(function (k) {
+          return '<option value="' + k + '"' + (v === k ? " selected" : "") + ">" + ROTULO_ORAL[k] + "</option>";
+        })).join("") + "</select></li>";
+    }).join("");
+    return '<details class="avaliacao"' + (avaliacaoDe(r) ? "" : "") + '><summary>Avaliação individual · <strong>' + esc(av.situacao || SITUACOES[0]) + "</strong>" +
+      (av.instrutor ? ' <span class="cinza">— ' + esc(av.instrutor) + ", " + quando(av.quando) + "</span>" : "") + "</summary>" +
+      '<form class="avaliacao-form" data-id="' + esc(r.id) + '" data-nome="' + esc(r.nome) + '">' +
+      '<p class="cinza">Escolha de 3 a 5 perguntas e uma situação prática. Deixe "—" nas que não foram feitas.</p>' +
+      '<ol class="orais">' + itens + "</ol>" +
+      '<div class="avaliacao-final"><label>Situação final<select name="situacao">' + SITUACOES.map(function (s) {
+        return '<option' + (s === av.situacao ? " selected" : "") + ">" + esc(s) + "</option>";
+      }).join("") + '</select></label><label class="largo">Observações<textarea name="obs" rows="2" maxlength="1000">' + esc(av.obs) + "</textarea></label></div>" +
+      '<p><button type="submit" class="btn-sec">Salvar avaliação</button></p></form></details>';
+  }
+
+  function historico(r) {
+    var k = idOficial(r);
+    var tentativas = dados.resultados.filter(function (x) { return idOficial(x) === k; }).sort(function (a, b) { return a.quando - b.quando; });
+    var aus = (dados.ausencias || []).filter(function (a) { return (chave(a.id) && chave(a.id) === chave(r.id)) || chave(a.nome) === chave(r.nome); });
+    var itens = tentativas.map(function (x) { return "<li>Prova em " + quando(x.quando) + ": <strong>" + x.nota + "%</strong> (" + (x.aprovado ? "aprovado" : "reprovado") + ")</li>"; })
+      .concat(aus.map(function (a) { return "<li>Justificativa de ausência em " + quando(a.quando) + " (" + esc(a.aplicacao) + "): " + esc(a.situacao) + "</li>"; }));
+    return '<div class="historico"><h4>Histórico</h4><ul>' + itens.join("") + "</ul></div>";
   }
 
   function desenharAgenda() {
@@ -196,7 +385,8 @@
         "<td><strong>" + esc(r.nome) + "</strong>" + (n > 1 ? ' <span class="selo-alerta">' + n + " tentativas</span>" : "") + "</td>" +
         "<td>" + esc(r.id) + "</td><td>" + esc(r.patente) + "</td>" +
         "<td>" + quando(r.quando) + '</td><td class="cost">' + r.acertos + "/" + r.recebidas + '</td><td class="cost">' + r.nota + "%</td>" +
-        '<td><span class="stamp ' + (r.aprovado ? "ok" : "") + '">' + (r.aprovado ? "APROVADO" : "REPROVADO") + "</span></td></tr>";
+        '<td><span class="stamp ' + (r.aprovado ? "ok" : "") + '">' + (r.aprovado ? "APROVADO" : "REPROVADO") + "</span>" +
+        (avaliacaoDe(r) ? '<span class="situacao-final">' + esc(avaliacaoDe(r).situacao) + "</span>" : "") + "</td></tr>";
       if (aberto === k) linha += '<tr class="ficha-oficial"><td colspan="7">' + ficha(r) + "</td></tr>";
       return linha;
     }).join("");
@@ -239,13 +429,15 @@
     r.respostas.forEach(function (x) { (porTopico[x.topico] = porTopico[x.topico] || []).push(x); });
     var html = '<div class="corrigir">' +
       (r.discord ? '<p class="ficha-discord">Discord: <strong>' + esc(r.discord) + "</strong></p>" : "<span></span>") +
-      '<button type="button" class="btn-sec" data-corrigir="' + r.linha + '">Corrigir dados</button></div>' +
+      '<span class="ficha-botoes"><button type="button" class="btn-sec" data-plano="' + esc(r.id + "|" + r.quando) + '">Copiar plano de estudo</button>' +
+      '<button type="button" class="btn-sec" data-corrigir="' + r.linha + '">Corrigir dados</button></span></div>' +
       '<form class="corrigir-form" data-linha="' + r.linha + '" data-antes="' + esc(r.nome) + '" hidden>' +
       '<label>Nome<input name="nome" maxlength="80" value="' + esc(r.nome) + '" required></label>' +
       '<label>ID fixo<input name="id" maxlength="30" value="' + esc(r.id) + '" required></label>' +
       '<label>Patente<input name="patente" maxlength="40" value="' + esc(r.patente) + '" required></label>' +
       '<span class="corrigir-botoes"><button type="submit" class="btn-sec">Salvar</button>' +
-      '<button type="button" class="btn-sec" data-cancelar>Cancelar</button></span></form>';
+      '<button type="button" class="btn-sec" data-cancelar>Cancelar</button></span></form>' +
+      historico(r) + formAvaliacao(r) + '<h4 class="respostas-titulo">Respostas da prova</h4>';
     dados.topicos.forEach(function (t) {
       var itens = porTopico[t];
       if (!itens) return;
@@ -369,6 +561,49 @@
   $("oficiais").addEventListener("keydown", function (ev) {
     var tr = ev.target.closest("tr.oficial");
     if (tr && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); alternar(tr); }
+  });
+
+  // ---------- Gestão: autor, recuperação, padrinhos, presença, plano e avaliação ----------
+  $("autor").value = autor();
+  $("autor").addEventListener("input", function () { try { localStorage.setItem(CHAVE_AUTOR, this.value.trim()); } catch (e) {} });
+  $("rec-ids").addEventListener("input", function () { this.dataset.editado = "1"; });
+  $("rec-agendar").addEventListener("click", function () {
+    var ini = new Date($("rec-inicio").value).getTime(), fim = new Date($("rec-fim").value).getTime();
+    var ids = $("rec-ids").value.trim();
+    if (!ini || !fim || fim <= ini) { carga("Confira o horário de início e fim da recuperação."); return; }
+    if (!ids) { carga("Informe pelo menos um ID."); return; }
+    if (!window.confirm("Agendar a recuperação de " + quando(ini) + " até " + quando(fim) + " para os IDs: " + ids + "?")) return;
+    $("rec-ids").dataset.editado = "";
+    carregar(lerSenha(), false, undefined, "&recuperacao=1&inicio=" + ini + "&fim=" + fim + "&ids=" + encodeURIComponent(ids));
+  });
+  $("rec-copiar-padrinhos").addEventListener("click", function () {
+    var pares = padrinhos(provas());
+    var texto = "🤝 **Padrinhos de estudo — recuperação**\n\n" + pares.map(function (x) {
+      return "• " + x.aluno.patente + " " + x.aluno.nome + " → " + (x.padrinho ? x.padrinho.patente + " " + x.padrinho.nome : "a definir");
+    }).join("\n") + "\n\nPadrinhos: façam uma patrulha guiada com seu afilhado antes da recuperação.";
+    copiar(texto, this, "Copiar padrinhos");
+  });
+  $("presenca").addEventListener("click", function (ev) {
+    var b = ev.target.closest("#copiar-faltosos");
+    if (b) copiar("⚠️ **Faltaram à prova sem justificativa**\n\n" + (window.__faltosos || ""), b, "Copiar lista");
+  });
+  $("oficiais").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-plano]");
+    if (!b) return;
+    ev.stopPropagation();
+    var r = dados.resultados.filter(function (x) { return x.id + "|" + x.quando === b.getAttribute("data-plano"); })[0];
+    if (r) copiar(planoDeEstudo(r), b, "Copiar plano de estudo");
+  }, true);
+  $("oficiais").addEventListener("submit", function (ev) {
+    var f = ev.target.closest(".avaliacao-form");
+    if (!f) return;
+    ev.preventDefault();
+    var orais = {};
+    [].forEach.call(f.querySelectorAll("select[name^=oral-]"), function (s) { if (s.value) orais[s.name.slice(5)] = s.value; });
+    f.querySelector("button[type=submit]").disabled = true;
+    carregar(lerSenha(), false, undefined, "&avaliar=" + encodeURIComponent(f.getAttribute("data-id")) +
+      "&nome=" + encodeURIComponent(f.getAttribute("data-nome")) + "&orais=" + encodeURIComponent(JSON.stringify(orais)) +
+      "&situacao_final=" + encodeURIComponent(f.elements.situacao.value) + "&obs=" + encodeURIComponent(f.elements.obs.value));
   });
 
   // Já entrou antes: mostra na hora os últimos dados guardados e atualiza por trás.

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulado · Cavalaria SD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="avaliacao">
+<div class="sheet">
+<main>
+
+  <section class="hero">
+    <span class="kicker">Treino</span>
+    <h2>Simulado</h2>
+    <p class="hero-sub">Treine antes da prova</p>
+    <p class="lead">Questões de treino com correção na hora. Nada é registrado e não conta nota. As questões são diferentes das da prova oficial.</p>
+    <span data-ornament></span>
+  </section>
+
+  <div class="filtros simulado-controles">
+    <label for="sim-topico" class="cinza">Assunto</label>
+    <select id="sim-topico"></select>
+    <button type="button" class="btn-sec" id="sim-novo">Novo simulado</button>
+  </div>
+
+  <p class="simulado-placar" id="sim-placar" aria-live="polite"></p>
+  <ol class="simulado" id="sim-lista"></ol>
+
+  <div id="sim-final" class="telegram" data-label="RESULTADO DO TREINO" hidden><p id="sim-final-texto"></p></div>
+
+  <p class="pager"><a href="avaliacao.html">← Prova de Conhecimento</a><a href="consulta.html">Consulta rápida →</a></p>
+
+</main>
+</div>
+<script src="js/layout.js"></script>
+<script src="js/simulado-data.js"></script>
+<script>
+  (function () {
+    var BANCO = window.SIMULADO;
+    var LETRAS = "abcd";
+    var lista = document.getElementById("sim-lista");
+    var sel = document.getElementById("sim-topico");
+    var respondidas = 0, certas = 0, total = 0;
+    function esc(t) { var d = document.createElement("div"); d.textContent = t; return d.innerHTML; }
+    function embaralhar(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+    var topicos = [];
+    BANCO.forEach(function (q) { if (topicos.indexOf(q.t) < 0) topicos.push(q.t); });
+    sel.innerHTML = '<option value="">Todos os assuntos (10 questões)</option>' +
+      topicos.map(function (t) { return '<option>' + esc(t) + '</option>'; }).join("");
+
+    function placar() {
+      document.getElementById("sim-placar").textContent = respondidas + " de " + total + " respondidas · " + certas + " certa(s)";
+      if (respondidas === total && total) {
+        var pct = Math.round(certas / total * 100);
+        document.getElementById("sim-final").hidden = false;
+        document.getElementById("sim-final-texto").innerHTML = "Você acertou <strong>" + certas + " de " + total + "</strong> (" + pct + "%). " +
+          (pct >= 70 ? "Bom treino! Na prova, a nota mínima é 70%." : "Abaixo de 70%. Revise os assuntos das questões que errou e faça um novo simulado.");
+      }
+    }
+
+    function novo() {
+      var t = sel.value;
+      var escolhidas = t ? embaralhar(BANCO.filter(function (q) { return q.t === t; }))
+        : embaralhar(topicos.map(function (tp) { return embaralhar(BANCO.filter(function (q) { return q.t === tp; })).slice(0, 2); }).reduce(function (a, b) { return a.concat(b); }, []));
+      respondidas = 0; certas = 0; total = escolhidas.length;
+      document.getElementById("sim-final").hidden = true;
+      lista.innerHTML = escolhidas.map(function (q, i) {
+        var ordem = embaralhar([0, 1, 2, 3]);
+        return '<li class="q sim-q" data-i="' + i + '"><p class="q-num">' + esc(q.t) + '</p><p class="sim-pergunta">' + esc(q.q) + '</p>' +
+          '<div class="q-opcoes">' + ordem.map(function (k, j) {
+            return '<button type="button" class="opcao sim-opcao" data-certa="' + (k === q.c ? 1 : 0) + '"><span class="letra">' + LETRAS[j] + '</span><span class="texto">' + esc(q.o[k]) + '</span></button>';
+          }).join("") + '</div><p class="sim-explica" hidden>' + esc(q.e) + ' <a href="' + q.p + '">Revisar o assunto</a></p></li>';
+      }).join("");
+      placar();
+      window.scrollTo(0, lista.offsetTop - 120);
+    }
+
+    lista.addEventListener("click", function (ev) {
+      var b = ev.target.closest(".sim-opcao");
+      if (!b) return;
+      var li = b.closest(".sim-q");
+      if (li.classList.contains("feita")) return;
+      li.classList.add("feita");
+      var acertou = b.getAttribute("data-certa") === "1";
+      b.classList.add(acertou ? "acertou" : "errou");
+      if (!acertou) li.querySelector('[data-certa="1"]').classList.add("acertou");
+      li.querySelectorAll(".sim-opcao").forEach(function (x) { x.disabled = true; });
+      li.querySelector(".sim-explica").hidden = false;
+      respondidas++; if (acertou) certas++;
+      placar();
+    });
+    document.getElementById("sim-novo").addEventListener("click", novo);
+    sel.addEventListener("change", novo);
+    novo();
+  })();
+</script>
+</body>
+</html>

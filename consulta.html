@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consulta Rápida · Cavalaria SD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="consulta">
+<div class="sheet">
+<main>
+
+  <section class="hero">
+    <span class="kicker">Para o Serviço</span>
+    <h2>Consulta Rápida</h2>
+    <p class="lead">O essencial dos manuais em uma página, e uma busca em todo o Livro da Cavalaria.</p>
+    <span data-ornament></span>
+  </section>
+
+  <div class="busca">
+    <label for="busca-site">Buscar no Livro da Cavalaria</label>
+    <input type="search" id="busca-site" placeholder="Ex.: perímetro, fiança, refém, pombo, mandado" autocomplete="off">
+    <p class="cinza" id="busca-info">Digite pelo menos 3 letras.</p>
+    <ol class="busca-resultados" id="busca-resultados"></ol>
+  </div>
+
+  <div class="cola">
+    <section class="cola-card">
+      <h4>Comandos de comunicação</h4>
+      <table><tbody>
+        <tr><td>/co</td><td>Comunicação em tempo real com o efetivo</td></tr>
+        <tr><td>/cavalaria</td><td>Alerta geral para toda a Cavalaria</td></tr>
+        <tr><td>/apoio</td><td>Alerta direto de oficial para oficial</td></tr>
+        <tr><td>/cm</td><td>Comunicação com os médicos</td></tr>
+      </tbody></table>
+      <p class="cola-alerta">Proibido usar desmaiado ou sequestrado.</p>
+    </section>
+
+    <section class="cola-card">
+      <h4>Papéis da patrulha</h4>
+      <ul class="star">
+        <li><strong>Líder:</strong> comanda e aborda, ou indica um designado.</li>
+        <li><strong>Apoio (2 a 3):</strong> protege quem aborda.</li>
+        <li><strong>Perímetro:</strong> isola a área, voltado para fora.</li>
+        <li><strong>Pombo:</strong> nunca desmonta; circula e pede reforço.</li>
+      </ul>
+      <p class="cinza">Abordagem em estrada: o líder anuncia <strong>"Cavalaria!"</strong> e o /co fica atualizado.</p>
+    </section>
+
+    <section class="cola-card">
+      <h4>Abordagem em cidades</h4>
+      <ol class="cola-passos">
+        <li><strong>Orientação:</strong> guardar a arma ou tirar a máscara.</li>
+        <li><strong>Advertência verbal:</strong> reforçar; se não cumprir, mandar sair da cidade.</li>
+        <li><strong>Ação direta:</strong> prisão se descumprir.</li>
+      </ol>
+      <p class="cinza">De 2 a 3 oficiais abordam; os demais fazem perímetro e protegem os pedestres.</p>
+    </section>
+
+    <section class="cola-card">
+      <h4>Cálculo da pena (MDT)</h4>
+      <ul class="star">
+        <li>No máximo <strong>3 artigos</strong> por ocorrência.</li>
+        <li><strong>Prisão:</strong> soma os minutos até 30; passou de 30, vale a pena do maior crime.</li>
+        <li><strong>Multa:</strong> nunca passa da maior multa entre os artigos.</li>
+        <li><strong>Inafiançável</strong> (Resistência à Prisão, Corrupção): sem fiança.</li>
+        <li>Prender ou multar: pessoa <strong>online e a até 5 metros</strong>.</li>
+      </ul>
+      <p class="cinza">Ex.: 10 + 10 + 15 min = 35 min → vale 15 min; multa até a maior ($20).</p>
+    </section>
+
+    <section class="cola-card cola-larga">
+      <h4>Negociação · custos dos pedidos</h4>
+      <table><tbody>
+        <tr><td>Definir o perímetro da ação</td><td class="cost">1 refém</td></tr>
+        <tr><td>Escolher o local de início dos oficiais</td><td class="cost">2 reféns</td></tr>
+        <tr><td>Apenas chão (sem telhados, muros etc.)</td><td class="cost">1 refém</td></tr>
+        <tr><td>Uso de interiores</td><td class="cost">a critério</td></tr>
+        <tr><td>Fuga limpa de 2 minutos</td><td class="cost">2 reféns</td></tr>
+        <tr><td>Uso de empunhadura única</td><td class="cost">1 refém</td></tr>
+        <tr><td>Vetar uma arma para os dois lados</td><td class="cost">3 reféns</td></tr>
+        <tr><td>Retirada de um oficial</td><td class="cost">3 reféns</td></tr>
+      </tbody></table>
+      <p class="cola-alerta">Proibido: retirar munição ou roupas, dinheiro pelo refém (salvo staff), escolher qual oficial sai, exigir início fora de perímetro já definido.</p>
+    </section>
+
+    <section class="cola-card">
+      <h4>Negociação · tempos e ações grandes</h4>
+      <ul class="star">
+        <li>Bandidos esperam a Cavalaria até <strong>20 min</strong>; depois do contato, mais <strong>10 min</strong>.</li>
+        <li>Lado de fora: banco e petrolífera <strong>até 2</strong>; estação <strong>só 1</strong>.</li>
+        <li>Efetivo: sempre <strong>2 oficiais a mais</strong> que o total de bandidos.</li>
+        <li>Quebra indevida: vira <strong>ação de rua</strong> e o bando leva advertência.</li>
+      </ul>
+    </section>
+
+    <section class="cola-card">
+      <h4>Código de Conduta · prazos</h4>
+      <table><tbody>
+        <tr><td>Permanência mínima</td><td class="cost">15 dias</td></tr>
+        <tr><td>Espera para voltar após sair</td><td class="cost">15 dias</td></tr>
+        <tr><td>Pagar multa disciplinar</td><td class="cost">7 dias</td></tr>
+      </tbody></table>
+      <p class="cinza">Identifique-se sempre que pedirem: <strong>nome completo, patente e xerifado</strong>.</p>
+    </section>
+  </div>
+
+  <p class="pager"><a href="simulado.html">← Simulado</a><a href="index.html">Início →</a></p>
+
+</main>
+</div>
+<script src="js/layout.js"></script>
+<script>
+  // Busca: lê as páginas do Livro da Cavalaria uma vez e procura nos trechos de cada seção.
+  (function () {
+    var PAGINAS = ["conduta.html", "prancheta.html", "patrulha.html", "lideranca.html", "negociacao.html", "cursos.html", "avaliacao.html"];
+    var indice = null, carregando = null;
+    var campo = document.getElementById("busca-site");
+    var info = document.getElementById("busca-info");
+    var saida = document.getElementById("busca-resultados");
+    function norm(t) { return String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+    function esc(t) { var d = document.createElement("div"); d.textContent = t; return d.innerHTML; }
+
+    function carregar() {
+      if (carregando) return carregando;
+      carregando = Promise.all(PAGINAS.map(function (pg) {
+        return fetch(pg).then(function (r) { return r.text(); }).then(function (html) {
+          var doc = new DOMParser().parseFromString(html, "text/html");
+          // Separa palavras que o layout junta: quebras de linha e números de seção ("2.1", "Art. 1º").
+          doc.querySelectorAll("br").forEach(function (b) { b.replaceWith(" "); });
+          doc.querySelectorAll(".n, .num").forEach(function (s) { s.after(" "); });
+          var titulo = (doc.querySelector(".hero h2") || {}).textContent || pg;
+          var trechos = [], secao = { h: titulo.replace(/\s+/g, " ").trim(), id: "", partes: [] };
+          doc.querySelectorAll("main h3, main h4, main p, main li, main td, main figcaption").forEach(function (el) {
+            if (el.closest(".hero, .toc, .pager")) return;
+            if (/^H[34]$/.test(el.tagName)) {
+              if (secao.partes.length) trechos.push(secao);
+              var ancora = el.id || (el.closest("[id]") || {}).id || "";
+              secao = { h: el.textContent.replace(/\s+/g, " ").trim(), id: el.tagName === "H3" ? el.id : (secao.id || ""), partes: [] };
+              if (el.tagName === "H3" && el.id) secao.id = el.id;
+              else if (!secao.id && ancora) secao.id = ancora;
+              return;
+            }
+            var t = el.textContent.replace(/\s+/g, " ").trim();
+            if (t && (el.tagName !== "TD" || t.length > 2)) secao.partes.push(t);
+          });
+          if (secao.partes.length) trechos.push(secao);
+          return trechos.map(function (s) { return { pagina: pg, titulo: titulo.replace(/\s+/g, " ").trim(), h: s.h, id: s.id, texto: s.partes.join(" · ") }; });
+        }).catch(function () { return []; });
+      })).then(function (listas) { indice = [].concat.apply([], listas); return indice; });
+      return carregando;
+    }
+
+    function buscar() {
+      var q = norm(campo.value.trim());
+      if (q.length < 3) { saida.innerHTML = ""; info.textContent = "Digite pelo menos 3 letras."; return; }
+      info.textContent = "Procurando…";
+      carregar().then(function () {
+        var termos = q.split(/\s+/);
+        var achados = indice.filter(function (s) {
+          var alvo = norm(s.h + " " + s.texto);
+          return termos.every(function (t) { return alvo.indexOf(t) >= 0; });
+        }).slice(0, 15);
+        info.textContent = achados.length ? achados.length + " resultado(s)" + (achados.length === 15 ? " (os 15 primeiros)" : "") : "Nada encontrado. Tente outra palavra.";
+        saida.innerHTML = achados.map(function (s) {
+          var alvo = norm(s.texto), pos = alvo.indexOf(termos[0]);
+          var ini = Math.max(0, pos - 70), trecho = s.texto.slice(ini, ini + 220);
+          var html = esc((ini ? "…" : "") + trecho + (ini + 220 < s.texto.length ? "…" : ""));
+          // Destaca os termos, aceitando maiúsculas e acentos (ex.: "refem" marca "Refém").
+          termos.forEach(function (t) {
+            try {
+              var padrao = t.split("").map(function (c) {
+                var variantes = [c, c.toUpperCase()].concat("áàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ".split("").filter(function (x) { return norm(x) === c; }));
+                return "[" + variantes.map(function (v) { return v.replace(/[\]\\^-]/g, "\\$&"); }).join("") + "]";
+              }).join("");
+              html = html.replace(new RegExp("(" + padrao + ")", "g"), "<mark>$1</mark>");
+            } catch (e) { /* sem destaque para este termo */ }
+          });
+          return '<li><a href="' + s.pagina + (s.id ? "#" + s.id : "") + '"><strong>' + esc(s.titulo) + "</strong> · " + esc(s.h) + "</a><p>" + html + "</p></li>";
+        }).join("");
+      });
+    }
+    var espera;
+    campo.addEventListener("input", function () { clearTimeout(espera); espera = setTimeout(buscar, 200); });
+    campo.addEventListener("focus", carregar, { once: true });
+  })();
+</script>
+</body>
+</html>

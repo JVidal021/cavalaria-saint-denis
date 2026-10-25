@@ -36,6 +36,7 @@
     <div class="painel-topo">
       <div class="telegram" data-label="AGENDA DA PROVA"><p id="agenda"></p></div>
       <p class="painel-acoes">
+        <label class="autor" for="autor">Seu nome <input id="autor" maxlength="40" placeholder="para o registro"></label>
         <span id="carga" class="carga" aria-live="polite"></span>
         <button type="button" class="btn-sec" id="atualizar">Atualizar</button>
         <button type="button" class="btn-sec" id="sair">Sair</button>
@@ -45,7 +46,9 @@
     <nav class="abas" role="tablist" aria-label="Seções do painel">
       <button type="button" role="tab" class="aba" id="aba-resumo" data-aba="resumo">Resumo</button>
       <button type="button" role="tab" class="aba" id="aba-oficiais" data-aba="oficiais">Oficiais <span class="contador-aba" id="n-oficiais"></span></button>
+      <button type="button" role="tab" class="aba" id="aba-presenca" data-aba="presenca">Presença <span class="contador-aba" id="n-faltosos"></span></button>
       <button type="button" role="tab" class="aba" id="aba-ausencias" data-aba="ausencias">Ausências <span class="contador-aba" id="n-ausencias"></span></button>
+      <button type="button" role="tab" class="aba" id="aba-registro" data-aba="registro">Registro</button>
     </nav>
 
     <div class="painel-aba" data-painel="resumo">
@@ -64,6 +67,23 @@
     </div>
 
     <div class="painel-aba" data-painel="oficiais">
+      <details class="recuperacao" id="recuperacao">
+        <summary>Recuperação e padrinhos de estudo <span id="n-recuperacao"></span></summary>
+        <div class="recuperacao-corpo">
+          <p>Agende uma aplicação liberada <strong>só para os IDs abaixo</strong>. A lista já vem com quem ainda não foi aprovado em nenhuma tentativa; ajuste se precisar.</p>
+          <div class="recuperacao-campos">
+            <label>Início<input type="datetime-local" id="rec-inicio"></label>
+            <label>Fim<input type="datetime-local" id="rec-fim"></label>
+            <label class="largo">IDs liberados<textarea id="rec-ids" rows="2"></textarea></label>
+          </div>
+          <p class="recuperacao-botoes">
+            <button type="button" class="btn-sec" id="rec-agendar">Agendar recuperação</button>
+            <button type="button" class="btn-sec" id="rec-copiar-padrinhos">Copiar padrinhos</button>
+          </p>
+          <h4>Padrinhos sugeridos</h4>
+          <ul class="padrinhos" id="padrinhos"></ul>
+        </div>
+      </details>
       <div class="filtros">
         <input type="search" id="busca" placeholder="Buscar por nome, ID ou patente">
         <select id="filtro">
@@ -93,6 +113,11 @@
       <textarea id="copia-reserva" class="copia-reserva" readonly hidden aria-label="Lista de aprovados para copiar"></textarea>
     </div>
 
+    <div class="painel-aba" data-painel="presenca">
+      <p class="presenca-ajuda" id="presenca-ajuda"></p>
+      <div class="presenca" id="presenca"></div>
+    </div>
+
     <div class="painel-aba" data-painel="ausencias">
       <div class="filtros">
         <select id="filtro-ausencias">
@@ -104,6 +129,11 @@
         <p class="ausencias-resumo" id="ausencias-resumo"></p>
       </div>
       <ol class="ausencias" id="ausencias"></ol>
+    </div>
+
+    <div class="painel-aba" data-painel="registro">
+      <p class="presenca-ajuda">As últimas ações feitas pelo painel: divulgação, ausências, correções, avaliações e recuperações. Preencha "Seu nome" no topo para aparecer aqui.</p>
+      <ol class="registro" id="registro"></ol>
     </div>
   </section>
 

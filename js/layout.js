@@ -8,6 +8,7 @@
     { id: "patrulha", href: "patrulha.html", label: "Patrulha & Abordagem" },
     { id: "lideranca", href: "lideranca.html", label: "Liderança" },
     { id: "negociacao", href: "negociacao.html", label: "Negociação" },
+    { id: "consulta", href: "consulta.html", label: "Consulta" },
     { id: "avaliacao", href: "avaliacao.html", label: "Prova" }
   ];
 
