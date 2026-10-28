@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=provas3">
 </head>
 <body data-page="avaliacao">
 <div class="sheet">
@@ -16,7 +16,7 @@
   <section class="hero">
     <span class="kicker">Edição Extra</span>
     <h2>Quadro de Honra</h2>
-    <p class="hero-sub">Aprovados na Prova de Conhecimento</p>
+    <p class="hero-sub">Aprovados nas provas da Cavalaria</p>
     <p class="lead">A Cavalaria de Saint Denis tem a honra de anunciar os oficiais aprovados na avaliação dos cursos.</p>
     <span data-ornament></span>
   </section>
@@ -26,17 +26,16 @@
   </div>
 
   <section id="quadro" hidden>
-    <p class="quadro-total" id="total"></p>
-    <ol class="honra" id="lista"></ol>
+    <div id="quadros"></div>
     <p class="quadro-rodape">Os demais oficiais devem procurar um instrutor para saber como refazer a avaliação.</p>
   </section>
 
-  <p class="pager"><a href="avaliacao.html">← Prova de Conhecimento</a><a href="ausencia.html">Justificar ausência →</a></p>
+  <p class="pager"><a href="avaliacao.html">← Provas da Cavalaria</a><a href="ausencia.html">Justificar ausência →</a></p>
 
 </main>
 </div>
 <script src="js/layout.js"></script>
-<script src="js/prova-data.js"></script>
+<script src="js/prova-data.js?v=provas1"></script>
 <script>
   (function () {
     function esc(t) { var d = document.createElement("div"); d.textContent = t == null ? "" : t; return d.innerHTML; }
@@ -50,15 +49,17 @@
         }
         document.getElementById("aviso").hidden = true;
         document.getElementById("quadro").hidden = false;
-        var n = r.aprovados.length;
-        document.getElementById("total").innerHTML = n
-          ? "<strong>" + n + "</strong> oficia" + (n === 1 ? "l aprovado" : "is aprovados")
-          : "Nenhum oficial aprovado até o momento.";
-        document.getElementById("lista").innerHTML = r.aprovados.map(function (a) {
-          return '<li class="honra-item"><span class="honra-estrela" aria-hidden="true">★</span>' +
-            '<span class="honra-nome">' + esc(a.nome) + '</span>' +
-            '<span class="honra-patente">' + esc(a.patente) + '</span>' +
-            '<span class="stamp ok">APROVADO</span></li>';
+        // Um quadro por prova divulgada.
+        document.getElementById("quadros").innerHTML = (r.provas || []).map(function (p) {
+          var n = p.aprovados.length;
+          return '<h3 class="section">' + esc(p.nome) + '</h3>' +
+            '<p class="quadro-total">' + (n ? "<strong>" + n + "</strong> oficia" + (n === 1 ? "l aprovado" : "is aprovados") : "Nenhum oficial aprovado até o momento.") + "</p>" +
+            '<ol class="honra">' + p.aprovados.map(function (a) {
+              return '<li class="honra-item"><span class="honra-estrela" aria-hidden="true">★</span>' +
+                '<span class="honra-nome">' + esc(a.nome) + '</span>' +
+                '<span class="honra-patente">' + esc(a.patente) + '</span>' +
+                '<span class="stamp ok">APROVADO</span></li>';
+            }).join("") + "</ol>";
         }).join("");
       })
       .catch(function () {

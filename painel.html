@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=provas3">
 </head>
 <!-- Página restrita aos instrutores: sem menu, protegida por senha. -->
 <body data-page="painel" data-isolada>
@@ -18,7 +18,7 @@
   <section class="hero">
     <span class="kicker">Uso Restrito</span>
     <h2>Painel do Instrutor</h2>
-    <p class="hero-sub">Prova de Conhecimento</p>
+    <p class="hero-sub">Provas da Cavalaria</p>
     <span data-ornament></span>
   </section>
 
@@ -36,6 +36,7 @@
     <div class="painel-topo">
       <div class="telegram" data-label="AGENDA DA PROVA"><p id="agenda"></p></div>
       <p class="painel-acoes">
+        <label class="autor" for="prova-sel">Prova <select id="prova-sel"></select></label>
         <label class="autor" for="autor">Seu nome <input id="autor" maxlength="40" placeholder="para o registro"></label>
         <span id="carga" class="carga" aria-live="polite"></span>
         <button type="button" class="btn-sec" id="atualizar">Atualizar</button>
@@ -46,7 +47,9 @@
     <nav class="abas" role="tablist" aria-label="Seções do painel">
       <button type="button" role="tab" class="aba" id="aba-resumo" data-aba="resumo">Resumo</button>
       <button type="button" role="tab" class="aba" id="aba-oficiais" data-aba="oficiais">Oficiais <span class="contador-aba" id="n-oficiais"></span></button>
+      <button type="button" role="tab" class="aba" id="aba-efetivo" data-aba="efetivo">Efetivo <span class="contador-aba" id="n-efetivo"></span></button>
       <button type="button" role="tab" class="aba" id="aba-presenca" data-aba="presenca">Presença <span class="contador-aba" id="n-faltosos"></span></button>
+      <button type="button" role="tab" class="aba" id="aba-agenda" data-aba="agenda">Agenda <span class="contador-aba" id="n-agenda"></span></button>
       <button type="button" role="tab" class="aba" id="aba-ausencias" data-aba="ausencias">Ausências <span class="contador-aba" id="n-ausencias"></span></button>
       <button type="button" role="tab" class="aba" id="aba-registro" data-aba="registro">Registro</button>
     </nav>
@@ -70,7 +73,7 @@
       <details class="recuperacao" id="recuperacao">
         <summary>Recuperação e padrinhos de estudo <span id="n-recuperacao"></span></summary>
         <div class="recuperacao-corpo">
-          <p>Agende uma aplicação liberada <strong>só para os IDs abaixo</strong>. A lista já vem com quem ainda não foi aprovado em nenhuma tentativa; ajuste se precisar.</p>
+          <p>Agende uma aplicação da prova <strong id="rec-prova"></strong> liberada <strong>só para os IDs abaixo</strong>. A lista já vem com quem ainda não foi aprovado em nenhuma tentativa; ajuste se precisar.</p>
           <div class="recuperacao-campos">
             <label>Início<input type="datetime-local" id="rec-inicio"></label>
             <label>Fim<input type="datetime-local" id="rec-fim"></label>
@@ -85,12 +88,17 @@
         </div>
       </details>
       <div class="filtros">
+        <select id="visao" aria-label="Como mostrar">
+          <option value="oficial">Por oficial</option>
+          <option value="envio">Por envio</option>
+        </select>
         <input type="search" id="busca" placeholder="Buscar por nome, ID ou patente">
         <select id="filtro">
           <option value="todos">Todos</option>
           <option value="aprovados">Aprovados</option>
           <option value="reprovados">Reprovados</option>
           <option value="repetidos">Com mais de uma tentativa</option>
+          <option value="recuperacao">Precisam de recuperação</option>
         </select>
         <label class="lembrar filtro-check"><input type="checkbox" id="ocultar-testes" checked> Ocultar testes</label>
         <button type="button" class="btn-sec" id="copiar-aprovados">Copiar aprovados</button>
@@ -113,9 +121,62 @@
       <textarea id="copia-reserva" class="copia-reserva" readonly hidden aria-label="Lista de aprovados para copiar"></textarea>
     </div>
 
+    <div class="painel-aba" data-painel="efetivo">
+      <p class="presenca-ajuda" id="efetivo-ajuda"></p>
+      <form class="efetivo-novo" id="efetivo-novo">
+        <label>Nome<input name="nome" maxlength="80" required></label>
+        <label>ID fixo<input name="id" maxlength="30" required></label>
+        <label>Patente<input name="patente" maxlength="40" list="patentes"></label>
+        <label class="largo">Observação<input name="obs" maxlength="200"></label>
+        <button type="submit" class="btn-sec">Incluir oficial</button>
+      </form>
+      <datalist id="patentes"></datalist>
+      <div class="filtros">
+        <input type="search" id="efetivo-busca" placeholder="Buscar por nome, ID ou patente">
+        <select id="efetivo-patente"></select>
+        <button type="button" class="btn-sec" id="copiar-efetivo">Copiar lista</button>
+      </div>
+      <div class="table-wrap">
+        <table class="tabela-efetivo">
+          <thead><tr id="efetivo-cabecalho"></tr></thead>
+          <tbody id="efetivo"></tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="painel-aba" data-painel="presenca">
+      <div class="filtros">
+        <label class="cinza" for="presenca-aplicacao">Aplicação</label>
+        <select id="presenca-aplicacao"></select>
+      </div>
       <p class="presenca-ajuda" id="presenca-ajuda"></p>
       <div class="presenca" id="presenca"></div>
+    </div>
+
+    <div class="painel-aba" data-painel="agenda">
+      <details class="recuperacao" id="nova-aplicacao" open>
+        <summary>Nova aplicação</summary>
+        <div class="recuperacao-corpo">
+          <div class="recuperacao-campos">
+            <label>Prova<select id="ag-prova"></select></label>
+            <label>Início<input type="datetime-local" id="ag-inicio"></label>
+            <label>Fim<input type="datetime-local" id="ag-fim"></label>
+            <label class="largo">Somente estes IDs <span class="cinza">(vazio = aberta a todos)</span><textarea id="ag-ids" rows="2"></textarea></label>
+            <label class="largo">Observação<input id="ag-obs" maxlength="120" placeholder="Ex.: Promoção a Cabo"></label>
+          </div>
+          <p class="cinza">Liberar por patente (puxa os IDs do Efetivo):</p>
+          <p class="patentes-chips" id="ag-patentes"></p>
+          <p class="recuperacao-botoes"><button type="button" class="btn-sec" id="ag-agendar">Agendar aplicação</button>
+            <button type="button" class="btn-sec" id="ag-cancelar-edicao" hidden>Cancelar edição</button></p>
+        </div>
+      </details>
+      <h3 class="section">Aplicações</h3>
+      <ol class="aplicacoes" id="aplicacoes"></ol>
+      <h3 class="section">Banco de questões</h3>
+      <p class="presenca-ajuda"><span id="banco-info"></span>. As questões ficam num arquivo privado no Drive do dono. Depois de trocar o arquivo, clique abaixo para o site e o formulário usarem o banco novo.</p>
+      <p class="recuperacao-botoes"><button type="button" class="btn-sec" id="ver-banco">Ver questões e gabarito</button>
+        <button type="button" class="btn-sec" id="atualizar-banco">Atualizar banco</button></p>
+      <div class="banco-lista" id="banco-lista"></div>
     </div>
 
     <div class="painel-aba" data-painel="ausencias">
@@ -134,14 +195,24 @@
     <div class="painel-aba" data-painel="registro">
       <p class="presenca-ajuda">As últimas ações feitas pelo painel: divulgação, ausências, correções, avaliações e recuperações. Preencha "Seu nome" no topo para aparecer aqui.</p>
       <ol class="registro" id="registro"></ol>
+      <details class="recuperacao">
+        <summary>Trocar a senha do painel</summary>
+        <form class="recuperacao-corpo" id="trocar-senha">
+          <div class="recuperacao-campos">
+            <label>Senha nova<input type="password" id="senha-nova" minlength="6" autocomplete="new-password" required></label>
+            <label>Repita a senha<input type="password" id="senha-confirma" minlength="6" autocomplete="new-password" required></label>
+          </div>
+          <p class="recuperacao-botoes"><button type="submit" class="btn-sec">Trocar senha</button></p>
+        </form>
+      </details>
     </div>
   </section>
 
 </main>
 </div>
 <script src="js/layout.js"></script>
-<script src="js/prova-data.js"></script>
-<script src="js/agenda.js"></script>
-<script src="js/painel.js?v=efetivo1"></script>
+<script src="js/prova-data.js?v=provas1"></script>
+<script src="js/agenda.js?v=provas1"></script>
+<script src="js/painel.js?v=provas3"></script>
 </body>
 </html>

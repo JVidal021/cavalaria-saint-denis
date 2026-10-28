@@ -10,16 +10,16 @@
       " às " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   }
 
-  // Datas da Agenda: aplicações recentes e próximas.
+  // Datas da Agenda: aplicações recentes e próximas. O rótulo começa pela data (o painel casa por ela).
   Agenda.consultar(false).then(function (e) {
     var opcoes = (e.aplicacoes || []).map(function (j) {
-      var rotulo = dataCurta(j.inicio);
+      var rotulo = dataCurta(j.inicio) + (j.prova ? " · " + j.prova.curto : "");
       return '<option value="' + rotulo + '">' + rotulo + (j.fim < Date.now() ? " (já aplicada)" : "") + "</option>";
     });
     $("a-aplicacao").innerHTML = '<option value="">Escolha…</option>' + opcoes.join("") +
       '<option value="Outra data">Outra data (explique na justificativa)</option>';
     var proxima = (e.aplicacoes || []).filter(function (j) { return j.fim > Date.now(); })[0];
-    if (proxima) $("a-aplicacao").value = dataCurta(proxima.inicio);
+    if (proxima) $("a-aplicacao").value = dataCurta(proxima.inicio) + (proxima.prova ? " · " + proxima.prova.curto : "");
   }).catch(function () {
     $("a-aplicacao").innerHTML = '<option value="">Escolha…</option><option value="Outra data">Data informada na justificativa</option>';
   });

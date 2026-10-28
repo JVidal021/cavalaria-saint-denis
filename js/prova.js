@@ -1,12 +1,14 @@
-// Prova de Conhecimento: mostra as questões no visual do site e envia as respostas
+// Prova da Cavalaria: mostra as questões da prova aberta no visual do site e envia as respostas
 // ao Formulário Google da Cavalaria, que corrige e registra na planilha do instrutor.
 (function () {
   var P = window.PROVA;
   var ROMANOS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
   var LETRAS = "abcd";
+  // Rascunho, sorteio e comprovante ficam guardados por aplicação (prova + horário de início).
   var CHAVE_RASCUNHO = "cavalaria-prova-rascunho";
   var CHAVE_ENVIO = "cavalaria-prova-enviada";
   var CHAVE_SORTEIO = "cavalaria-prova-sorteio";
+  var APLICACAO = null; // dados da aplicação aberta (prova, campo da prova, páginas do formulário)
 
   var form = document.getElementById("prova");
   var status = document.getElementById("prova-status");
@@ -68,10 +70,6 @@
     return montarSelecao(sel);
   }
 
-  // Já enviou neste navegador: mostra só o comprovante.
-  var envio = ler(CHAVE_ENVIO);
-  if (envio) { mostrarEnviada(envio); return; }
-
   // As questões só chegam se a prova estiver aberta na agenda (e, na recuperação, se o ID foi convocado).
   var idRecuperacao = "";
   function buscar(id) {
@@ -81,7 +79,14 @@
       if (!e.modulos) { fechada(Agenda.descrever(e)); return; }
       idRecuperacao = id || "";
       $("recuperacao-id").hidden = true;
-      MODULOS = sortear(e.modulos, e.sorteio || P.sorteio);
+      APLICACAO = e;
+      var sufixo = "-" + (e.prova ? e.prova.id : "prova") + "-" + (e.inicio || "");
+      CHAVE_RASCUNHO += sufixo; CHAVE_ENVIO += sufixo; CHAVE_SORTEIO += sufixo;
+      apresentar(e.prova, e);
+      // Já enviou esta aplicação neste navegador: mostra só o comprovante.
+      var envio = ler(CHAVE_ENVIO);
+      if (envio) { mostrarEnviada(envio); return; }
+      MODULOS = sortear(e.modulos, e.sorteio || 4);
       total = MODULOS.reduce(function (n, m) { return n + m.questoes.length; }, 0);
       statusTexto.innerHTML = Agenda.descrever(e);
       montar();
@@ -109,6 +114,16 @@
     buscar(id);
   });
   function $(id) { return document.getElementById(id); }
+  // Título da página com o nome da prova aberta.
+  function apresentar(prova, e) {
+    if (!prova) return;
+    var info = (P.provas || []).filter(function (x) { return x.id === prova.id; })[0] || {};
+    $("prova-titulo").textContent = prova.nome;
+    document.title = prova.nome + " · Cavalaria SD";
+    var n = e.modulos ? e.modulos.length * (e.sorteio || info.sorteio || 4) : info.totalQuestoes;
+    $("prova-lead").textContent = (n ? n + " questões objetivas, " + (e.sorteio || info.sorteio) + " de cada tópico, sorteadas para você. " : "") +
+      "Nota mínima: " + (e.notaMinima || info.notaMinima) + "%.";
+  }
   buscar();
 
   function fechada(msg) {
@@ -260,8 +275,12 @@
     Object.keys(d).forEach(function (nome) {
       if (d[nome]) envioForm.appendChild(el("input", { type: "hidden", name: nome, value: d[nome] }));
     });
+    // Campo "Prova" do formulário: diz ao corretor qual prova o oficial fez.
+    if (APLICACAO.campoProva && APLICACAO.prova) {
+      envioForm.appendChild(el("input", { type: "hidden", name: "entry." + APLICACAO.campoProva, value: APLICACAO.prova.curto }));
+    }
     var paginas = [];
-    for (var i = 0; i < P.paginas; i++) paginas.push(i);
+    for (var i = 0; i < (APLICACAO.paginas || P.paginas); i++) paginas.push(i);
     envioForm.appendChild(el("input", { type: "hidden", name: "pageHistory", value: paginas.join(",") }));
     document.body.appendChild(envioForm);
 
@@ -280,6 +299,7 @@
       var registro = {
         nome: d["entry." + P.identificacao[0].entry],
         patente: d["entry." + P.identificacao[2].entry],
+        prova: APLICACAO.prova ? APLICACAO.prova.nome : "",
         quando: new Date().toLocaleString("pt-BR")
       };
       guardar(CHAVE_ENVIO, registro);
@@ -298,7 +318,7 @@
     document.getElementById("prova-status").hidden = true;
     document.getElementById("prova-enviada").hidden = false;
     document.getElementById("prova-enviada-texto").innerHTML =
-      "Prova de <strong>" + esc(r.patente || "") + " " + esc(r.nome || "") + "</strong> recebida pela Cavalaria em " +
+      (r.prova ? esc(r.prova) + " de <strong>" : "Prova de <strong>") + esc(r.patente || "") + " " + esc(r.nome || "") + "</strong> recebida pela Cavalaria em " +
       esc(r.quando || "") + ".<br>O resultado será divulgado pelo instrutor. Bom serviço, oficial.";
     window.scrollTo(0, 0);
   }

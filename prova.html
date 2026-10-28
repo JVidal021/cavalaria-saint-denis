@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prova de Conhecimento · Cavalaria SD</title>
+<title>Prova da Cavalaria · Cavalaria SD</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=provas3">
 </head>
 <!-- Página isolada: sem menu e sem links para o material de estudo. -->
 <body data-page="prova" data-isolada>
@@ -17,9 +17,9 @@
 
   <section class="hero">
     <span class="kicker">Avaliação Oficial</span>
-    <h2>Prova de Conhecimento</h2>
+    <h2 id="prova-titulo">Prova da Cavalaria</h2>
     <p class="hero-sub">da Cavalaria de Saint Denis</p>
-    <p class="lead">20 questões objetivas, 4 de cada tópico, sorteadas para você.</p>
+    <p class="lead" id="prova-lead">Questões objetivas sorteadas para você.</p>
     <span data-ornament></span>
   </section>
 
@@ -33,7 +33,7 @@
       <input id="rec-id" maxlength="30" autocomplete="off" required>
       <button type="submit" class="btn-enviar">Continuar</button>
     </div>
-    <p id="recuperacao-erro" class="notice" hidden><span class="label">Não convocado</span>Este ID não está na lista desta recuperação. Confira o número ou procure um instrutor.</p>
+    <p id="recuperacao-erro" class="notice" hidden><span class="label">Não convocado</span>Este ID não está na lista desta aplicação. Confira o número ou procure um instrutor.</p>
   </form>
 
   <div id="prova-enviada" class="telegram" data-label="TELEGRAMA · PROVA RECEBIDA" hidden>
@@ -69,8 +69,8 @@
 </main>
 </div>
 <script src="js/layout.js"></script>
-<script src="js/prova-data.js"></script>
-<script src="js/agenda.js"></script>
-<script src="js/prova.js"></script>
+<script src="js/prova-data.js?v=provas1"></script>
+<script src="js/agenda.js?v=provas1"></script>
+<script src="js/prova.js?v=provas1"></script>
 </body>
 </html>

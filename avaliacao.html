@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prova de Conhecimento · Cavalaria SD</title>
+<title>Provas da Cavalaria · Cavalaria SD</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=provas3">
 </head>
 <body data-page="avaliacao">
 <div class="sheet">
@@ -15,14 +15,15 @@
 
   <section class="hero">
     <span class="kicker">Avaliação Oficial</span>
-    <h2>Prova de Conhecimento</h2>
-    <p class="hero-sub">da Cavalaria de Saint Denis</p>
-    <p class="lead">Avaliação escrita dos cursos da Cavalaria, aplicada nas datas definidas pelo instrutor.</p>
+    <h2>Provas da Cavalaria</h2>
+    <p class="hero-sub">de Saint Denis</p>
+    <p class="lead">Avaliações escritas dos cursos e da promoção, aplicadas nas datas definidas pelos instrutores.</p>
     <span data-ornament></span>
   </section>
 
-  <div class="telegram" id="agenda-status" data-label="AGENDA DA PROVA">
-    <p id="agenda-texto">Consultando a agenda da prova…</p>
+  <div class="telegram" id="agenda-status" data-label="AGENDA DAS PROVAS">
+    <p id="agenda-texto">Consultando a agenda…</p>
+    <ul class="agenda-lista" id="agenda-lista" hidden></ul>
   </div>
   <p class="iniciar-area">
     <a class="btn-enviar" id="btn-iniciar" href="prova.html" aria-disabled="true">Iniciar a prova</a>
@@ -33,50 +34,57 @@
     <a class="course" href="simulado.html">Simulado de treino</a>
   </p>
 
-  <div class="cols">
-    <div>
-      <h3 class="section">Instruções</h3>
-      <ol class="steps">
-        <li>A prova só abre <strong>no dia e horário</strong> informados pelo instrutor. Fora disso, ela fica fechada.</li>
-        <li>Durante a prova, <strong>o material não fica disponível</strong>: a página da prova não tem menu nem links. Estude antes.</li>
-        <li>Responda <strong>sozinho e sem consultar</strong>. Preencha nome, ID fixo e patente exatamente como estão no MDT.</li>
-        <li>São <strong>20 questões objetivas</strong>, 4 de cada tópico, <strong>sorteadas para cada oficial</strong> entre as do banco da Cavalaria. A ordem das alternativas também muda de pessoa para pessoa.</li>
-        <li>Todas são obrigatórias e têm uma única resposta correta.</li>
-        <li>Envie <strong>uma única vez</strong>. Todo envio fica registrado para o instrutor.</li>
-        <li>A nota mínima é <strong>70%</strong> (14 acertos). O resultado é divulgado pelo instrutor.</li>
-      </ol>
-    </div>
-    <div>
-      <h3 class="section">O que estudar</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Módulo</th><th style="text-align:right">Questões</th></tr></thead>
-          <tbody>
-            <tr><td><a href="conduta.html">Código de Conduta</a></td><td class="cost">4</td></tr>
-            <tr><td><a href="prancheta.html">MDT · Prancheta</a></td><td class="cost">4</td></tr>
-            <tr><td><a href="patrulha.html">Patrulha e Abordagem</a></td><td class="cost">4</td></tr>
-            <tr><td><a href="negociacao.html">Negociação</a></td><td class="cost">4</td></tr>
-            <tr><td><a href="lideranca.html">Liderança de Patrulha</a></td><td class="cost">4</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+  <h3 class="section">Instruções</h3>
+  <ol class="steps">
+    <li>A prova só abre <strong>no dia e horário</strong> informados pelos instrutores. Fora disso, ela fica fechada.</li>
+    <li>Algumas aplicações são <strong>só para os oficiais convocados</strong> (recuperação e promoção). Nelas, a prova pede o seu ID fixo antes de abrir.</li>
+    <li>Durante a prova, <strong>o material não fica disponível</strong>: a página da prova não tem menu nem links. Estude antes.</li>
+    <li>Responda <strong>sozinho e sem consultar</strong>. Preencha nome, ID fixo e patente exatamente como estão no MDT.</li>
+    <li>As questões são <strong>sorteadas para cada oficial</strong> entre as do banco da Cavalaria, e a ordem das alternativas muda de pessoa para pessoa. Todas são obrigatórias e têm uma única resposta correta.</li>
+    <li>Envie <strong>uma única vez</strong>. Todo envio fica registrado para os instrutores, que divulgam o resultado.</li>
+  </ol>
 
-  <div class="notice instrutor">
-    <span class="label">Avaliação individual</span>
-    <p>Além da prova escrita, cada oficial passará <strong>posteriormente</strong> por uma <strong>avaliação individual</strong> com um instrutor, com perguntas orais e uma situação prática sobre os mesmos assuntos.</p>
-  </div>
+  <h3 class="section">Carreira e provas</h3>
+  <ol class="carreira" aria-label="Patentes da Cavalaria, da mais alta para a mais baixa">
+    <li class="patente">🎖️ Capitão</li>
+    <li class="patente">🎖️ Tenente</li>
+    <li class="degrau" data-prova="altocomando"><a href="#prova-altocomando">Prova de Alto Comando</a> dificuldade elevada</li>
+    <li class="patente">🔰 Oficial Sênior</li>
+    <li class="patente">🔰 Oficial</li>
+    <li class="degrau" data-prova="oficialato"><a href="#prova-oficialato">Prova de Oficialato</a> dificuldade média + prova prática</li>
+    <li class="patente">🔹 Oficial Júnior</li>
+    <li class="patente">📘 Aspirante</li>
+    <li class="patente">📗 Cadete</li>
+    <li class="degrau" data-prova="iniciais"><a href="#prova-iniciais">Prova de Conhecimento</a> cursos iniciais</li>
+    <li class="patente">📕 Recruta</li>
+  </ol>
+
+  <h3 class="section">As provas</h3>
+  <div class="provas-cards" id="provas-cards"></div>
 
 </main>
 </div>
 <script src="js/layout.js"></script>
-<script src="js/prova-data.js"></script>
-<script src="js/agenda.js"></script>
+<script src="js/prova-data.js?v=provas1"></script>
+<script src="js/agenda.js?v=provas1"></script>
 <script>
   (function () {
+    function esc(t) { var d = document.createElement("div"); d.textContent = t == null ? "" : t; return d.innerHTML; }
     var texto = document.getElementById("agenda-texto");
     var botao = document.getElementById("btn-iniciar");
+    // Uma ficha por prova: para quem é, quantas questões, nota mínima e o que estudar.
+    document.getElementById("provas-cards").innerHTML = (window.PROVA.provas || []).map(function (p) {
+      var minimo = Math.ceil(p.totalQuestoes * p.notaMinima / 100);
+      return '<section class="prova-card" id="prova-' + esc(p.id) + '"><h4>' + esc(p.nome) + '</h4><p class="cinza">' + esc(p.subtitulo) + '</p>' +
+        '<p><strong>Para quem:</strong> ' + esc(p.publico) + '</p>' +
+        '<p><strong>' + p.totalQuestoes + ' questões</strong>, ' + p.sorteio + ' de cada tópico · nota mínima <strong>' + p.notaMinima + '%</strong> (' + minimo + ' acertos)</p>' +
+        (p.pratica ? '<p class="prova-pratica"><strong>+ Prova prática:</strong> quem passar na escrita faz, depois, uma avaliação individual com um instrutor, com perguntas orais e uma situação prática.</p>' : "") +
+        '<div class="table-wrap"><table><thead><tr><th>O que estudar</th><th style="text-align:right">Questões</th></tr></thead><tbody>' +
+        p.modulos.map(function (m) {
+          return '<tr><td>' + (m.link ? '<a href="' + esc(m.link) + '">' + esc(m.nome) + '</a>' : esc(m.nome)) + '</td><td class="cost">' + m.total + '</td></tr>';
+        }).join("") + '</tbody></table></div></section>';
+    }).join("");
+
     function bloquear(sim) {
       botao.setAttribute("aria-disabled", sim ? "true" : "false");
       botao.classList.toggle("bloqueado", sim);
@@ -86,6 +94,14 @@
     Agenda.consultar(false).then(function (e) {
       texto.innerHTML = Agenda.descrever(e);
       bloquear(!e.aberta);
+      // Próximas aplicações, com a prova de cada uma.
+      var futuras = (e.aplicacoes || []).filter(function (j) { return j.inicio > Date.now(); });
+      var lista = document.getElementById("agenda-lista");
+      lista.hidden = futuras.length < 2;
+      lista.innerHTML = futuras.map(function (j) {
+        return "<li><strong>" + esc(j.prova ? j.prova.nome : "Prova") + "</strong> · " + Agenda.formatar(j.inicio) + " até " + Agenda.hora(j.fim) +
+          (j.restrita ? ' <span class="cinza">(só convocados)</span>' : "") + "</li>";
+      }).join("");
     }).catch(function () {
       texto.innerHTML = "Não foi possível consultar a agenda agora. Recarregue a página em instantes.";
     });

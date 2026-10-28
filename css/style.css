@@ -902,7 +902,7 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
 .recuperacao-campos { display: flex; gap: 10px; flex-wrap: wrap; }
 .recuperacao-campos label, .avaliacao-final label { display: flex; flex-direction: column; gap: 2px; font-variant: small-caps; letter-spacing: .08em; font-weight: 700; color: var(--ink-soft); }
 .recuperacao-campos .largo, .avaliacao-final .largo { flex: 1 1 260px; }
-.recuperacao-campos input, .recuperacao-campos textarea, .avaliacao-final select, .avaliacao-final textarea, .oral select {
+.recuperacao-campos input, .recuperacao-campos textarea, .recuperacao-campos select, .avaliacao-final select, .avaliacao-final textarea, .oral select {
   font: inherit; font-variant: normal; letter-spacing: 0; font-weight: 400; padding: 5px 8px; border: 1px solid var(--ink-soft); background: var(--paper-light); color: var(--ink); }
 .recuperacao-botoes { display: flex; gap: 8px; flex-wrap: wrap; }
 .padrinhos { padding-left: 20px; margin: 4px 0 6px; }
@@ -957,3 +957,52 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
 .cola-alerta { margin: 8px 0 0; padding: 6px 10px; border-left: 3px solid var(--blood); background: rgba(122, 31, 20, .07); font-size: .95rem; }
 .cola-passos { padding-left: 20px; margin: 4px 0 8px; }
 .cola-card .cinza { margin: 6px 0 0; font-size: .95rem; }
+
+/* ---------- Várias provas: fichas, agenda, Efetivo e aplicações ---------- */
+.provas-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin: 10px 0 24px; }
+.prova-card { border: 1px solid var(--rule); background: rgba(255, 248, 228, .45); padding: 14px 16px 6px; }
+.prova-card h4 { margin: 0 0 2px; }
+.prova-card p { margin: 6px 0; }
+.agenda-lista { margin: 8px 0 0; padding-left: 20px; }
+.agenda-lista li { margin: 3px 0; }
+.efetivo-novo, .efetivo-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin: 10px 0 12px; padding: 10px 12px; border: 1px dashed var(--brass); background: rgba(169, 124, 47, .08); }
+.efetivo-novo label, .efetivo-form label { display: flex; flex-direction: column; gap: 2px; font-variant: small-caps; letter-spacing: .08em; font-weight: 700; color: var(--ink-soft); flex: 1 1 140px; }
+.efetivo-novo label.largo, .efetivo-form label.largo { flex: 2 1 240px; }
+.efetivo-novo input, .efetivo-form input { font: inherit; font-variant: normal; letter-spacing: 0; font-weight: 400; color: var(--ink); padding: 5px 8px; border: 1px solid var(--ink-soft); background: var(--paper-light); }
+.tabela-efetivo td { vertical-align: top; }
+.tabela-efetivo .stamp { margin-right: 6px; }
+.tabela-efetivo .situacao-final { display: block; font-size: .85rem; color: var(--ink-soft); }
+.tabela-efetivo tr.editando td { background: rgba(169, 124, 47, .06); }
+.btn-sec.perigo { color: var(--blood); border-color: var(--blood); }
+.patentes-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+.chip { font: inherit; font-size: .95rem; cursor: pointer; padding: 3px 10px; border: 1px solid var(--ink-soft); background: var(--paper-light); color: var(--ink); border-radius: 12px; }
+.chip:hover { border-color: var(--blood); }
+.chip.usado { background: var(--ink); color: var(--paper-light); }
+.aplicacoes { list-style: none; margin: 0; padding: 0; }
+.aplicacao { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.aplicacao p { margin: 2px 0 0; }
+.aplicacao.encerrada { opacity: .7; }
+#prova-sel { font: inherit; padding: 3px 6px; border: 1px solid var(--ink-soft); background: var(--paper-light); }
+@media (max-width: 640px) { .aplicacao { flex-direction: column; } }
+.tentativas { white-space: nowrap; }
+.tentativa { display: inline-block; padding: 1px 7px; border: 1px solid currentColor; font-size: .88rem; font-weight: 700; }
+.tentativa.ok { color: #2f4a23; background: rgba(47, 74, 35, .08); }
+.tentativa.mal { color: var(--blood); background: rgba(122, 31, 20, .06); }
+.tentativas .seta { margin: 0 4px; color: var(--ink-soft); }
+.chip.alvo { border-color: var(--blood); font-weight: 700; }
+.chip.alvo.usado { background: var(--blood); border-color: var(--blood); }
+.carreira { list-style: none; margin: 8px auto 24px; padding: 0; max-width: 520px; }
+.carreira .patente { text-align: center; padding: 6px 10px; border: 1px solid var(--rule); background: rgba(255, 248, 228, .45); margin: 0 0 -1px; font-weight: 700; }
+.carreira .degrau { text-align: center; padding: 8px 10px; margin: 6px 0; color: var(--ink-soft); font-style: italic; border-left: 3px solid var(--blood); border-right: 3px solid var(--blood); }
+.carreira .degrau a { display: block; font-style: normal; font-variant: small-caps; letter-spacing: .1em; font-weight: 700; color: var(--blood); }
+.prova-pratica { border-left: 3px solid var(--brass); padding-left: 8px; }
+.aplicacao-botoes { display: flex; gap: 6px; flex-wrap: wrap; }
+.banco-lista { margin: 10px 0 0; }
+.banco-prova { border: 1px solid var(--rule); padding: 8px 12px; margin: 0 0 10px; background: rgba(255, 248, 228, .35); }
+.banco-prova summary { cursor: pointer; }
+.banco-questoes { padding-left: 22px; }
+.banco-questoes > li { margin: 0 0 10px; }
+.banco-questoes > li > p { margin: 0 0 4px; }
+.banco-questoes ul { list-style: none; margin: 0; padding: 0 0 0 6px; }
+.banco-questoes ul li.certa { font-weight: 700; color: #2f4a23; }
+.banco-questoes .letra { display: inline-block; width: 1.5em; font-variant: small-caps; font-weight: 700; color: var(--ink-soft); }
