@@ -262,18 +262,30 @@
       return melhores(dados.resultados.filter(function (r) { return r.prova === x.id && (!ocultar || !ehTeste(r)); }));
     });
     $("efetivo-cabecalho").innerHTML = "<th>Oficial</th><th>ID</th><th>Patente</th>" +
-      dados.provas.map(function (x) { return "<th>" + esc(x.curto) + "</th>"; }).join("") + "<th>Observação</th><th></th>";
+      dados.provas.map(function (x) { return "<th>" + esc(x.curto) + "</th>"; }).join("") + "<th>Padrinho</th><th>Observação</th><th></th>";
     var lista = efetivo.filter(function (o) {
       return (!pat || o.patente === pat) && (!busca || chave(o.nome + " " + o.id + " " + o.patente).indexOf(busca) >= 0);
     }).sort(function (a, b) { return (a.patente + a.nome).localeCompare(b.patente + b.nome, "pt-BR"); });
-    var colunas = 5 + dados.provas.length;
+    var colunas = 6 + dados.provas.length;
+    var todos = efetivo.filter(function (o) { return o.id; }).sort(function (a, b) { return (a.patente + a.nome).localeCompare(b.patente + b.nome, "pt-BR"); });
+    function seletorPadrinho(o) {
+      var atual = padrinhoDe(o), achou = false;
+      var opcoes = todos.filter(function (x) { return chave(x.id) !== chave(o.id); }).map(function (x) {
+        var sel = chave(x.id) === chave(atual);
+        if (sel) achou = true;
+        return '<option value="' + esc(x.id) + '"' + (sel ? " selected" : "") + ">" + esc((x.patente ? x.patente + " " : "") + x.nome) + "</option>";
+      }).join("");
+      if (atual && !achou) opcoes = '<option value="' + esc(atual) + '" selected>ID ' + esc(atual) + " (fora do Efetivo)</option>" + opcoes;
+      return '<select class="padrinho-sel" data-padrinho-linha="' + o.linha + '" aria-label="Padrinho de ' + esc(o.nome) + '">' +
+        '<option value="">Automático</option>' + opcoes + "</select>";
+    }
     $("efetivo").innerHTML = lista.length ? lista.map(function (o) {
       if (editandoEfetivo === o.linha) {
         return '<tr class="editando"><td colspan="' + colunas + '"><form class="efetivo-form" data-linha="' + o.linha + '" data-antes="' + esc(o.nome) + '">' +
           '<label>Nome<input name="nome" maxlength="80" value="' + esc(o.nome) + '" required></label>' +
           '<label>ID fixo<input name="id" maxlength="30" value="' + esc(o.id) + '" required></label>' +
           '<label>Patente<input name="patente" maxlength="40" list="patentes" value="' + esc(o.patente) + '"></label>' +
-          '<label class="largo">Observação<input name="obs" maxlength="200" value="' + esc(o.obs) + '"></label>' +
+          '<label class="largo">Observação<input name="obs" maxlength="200" value="' + esc(obsLimpa(o)) + '"></label>' +
           '<span class="corrigir-botoes"><button type="submit" class="btn-sec">Salvar</button>' +
           '<button type="button" class="btn-sec" data-efetivo-cancelar>Cancelar</button>' +
           '<button type="button" class="btn-sec perigo" data-efetivo-remover>Retirar do Efetivo</button></span></form></td></tr>';
@@ -285,7 +297,7 @@
           (av ? '<span class="situacao-final">' + esc(av.situacao) + "</span>" : "") + "</td>";
       }).join("");
       return "<tr><td><strong>" + esc(o.nome) + "</strong></td><td>" + esc(o.id) + "</td><td>" + esc(o.patente) + "</td>" + celulas +
-        '<td class="cinza">' + esc(o.obs) + '</td><td><button type="button" class="btn-sec" data-efetivo-editar="' + o.linha + '">Editar</button></td></tr>';
+        "<td>" + seletorPadrinho(o) + '</td><td class="cinza">' + esc(obsLimpa(o)) + '</td><td><button type="button" class="btn-sec" data-efetivo-editar="' + o.linha + '">Editar</button></td></tr>';
     }).join("") : '<tr><td colspan="' + colunas + '" class="cinza">Ninguém neste filtro.</td></tr>';
   }
   var editandoEfetivo = null;
@@ -329,6 +341,12 @@
   }
 
   // ---------- Recuperação e padrinhos ----------
+  // O padrinho escolhido à mão fica guardado na Observação do Efetivo, como "[Padrinho: ID]".
+  var MARCA_PADRINHO = /\s*\[padrinho:\s*([^\]]*)\]/i;
+  function padrinhoDe(o) { var m = MARCA_PADRINHO.exec((o && o.obs) || ""); return m ? m[1].trim() : ""; }
+  function obsLimpa(o) { return String((o && o.obs) || "").replace(MARCA_PADRINHO, "").trim(); }
+  function obsCom(obs, padrinhoId) { return (String(obs || "").trim() + (padrinhoId ? " [Padrinho: " + padrinhoId + "]" : "")).trim(); }
+  function doEfetivo(id) { return (dados.efetivo || []).filter(function (x) { return id && chave(x.id) === chave(id); })[0] || null; }
   function pendentesDeAprovacao(res) {
     var m = melhores(res);
     return Object.keys(m).map(function (k) { return m[k]; }).filter(function (r) { return !r.aprovado; });
@@ -337,8 +355,18 @@
     var m = melhores(res);
     var aprovados = Object.keys(m).map(function (k) { return m[k]; }).filter(function (r) { return r.aprovado; })
       .sort(function (a, b) { return b.nota - a.nota; });
-    var uso = {};
+    var uso = {}, escolhidos = {};
+    // Primeiro os padrinhos definidos à mão no Efetivo (contam no rodízio dos sugeridos).
+    pendentesDeAprovacao(res).forEach(function (r) {
+      var pid = padrinhoDe(doEfetivo(r.id));
+      if (!pid) return;
+      var o = doEfetivo(pid) || { nome: "ID " + pid, id: pid, patente: "" };
+      var p = m[chave(pid)] ? { nome: o.nome, id: o.id, patente: o.patente, nota: m[chave(pid)].nota } : { nome: o.nome, id: o.id, patente: o.patente, nota: null };
+      escolhidos[idOficial(r)] = p;
+      uso[chave(pid)] = (uso[chave(pid)] || 0) + 1;
+    });
     return pendentesDeAprovacao(res).map(function (r) {
+      if (escolhidos[idOficial(r)]) return { aluno: r, padrinho: escolhidos[idOficial(r)], manual: true };
       var candidatos = aprovados.filter(function (a) { return chave(a.patente) === chave(r.patente); });
       if (!candidatos.length) candidatos = aprovados;
       candidatos = candidatos.slice().sort(function (a, b) { return (uso[idOficial(a)] || 0) - (uso[idOficial(b)] || 0) || b.nota - a.nota; });
@@ -360,7 +388,8 @@
     var pares = padrinhos(res);
     $("padrinhos").innerHTML = pares.length ? pares.map(function (x) {
       return "<li><strong>" + esc(x.aluno.patente + " " + x.aluno.nome) + "</strong> (" + x.aluno.nota + "%) → " +
-        (x.padrinho ? esc(x.padrinho.patente + " " + x.padrinho.nome) + " (" + x.padrinho.nota + "%)" : "sem aprovado disponível") + "</li>";
+        (x.padrinho ? esc((x.padrinho.patente ? x.padrinho.patente + " " : "") + x.padrinho.nome) + (x.padrinho.nota != null ? " (" + x.padrinho.nota + "%)" : "") +
+          (x.manual ? ' <span class="stamp ok">ESCOLHIDO</span>' : ' <span class="cinza">· sugerido</span>') : "sem aprovado disponível") + "</li>";
     }).join("") : '<li class="cinza">Ninguém precisa de padrinho: todos foram aprovados.</li>';
   }
 
@@ -785,7 +814,7 @@
   $("rec-copiar-padrinhos").addEventListener("click", function () {
     var pares = padrinhos(provas());
     var texto = "🤝 **Padrinhos de estudo — recuperação**\n\n" + pares.map(function (x) {
-      return "• " + x.aluno.patente + " " + x.aluno.nome + " → " + (x.padrinho ? x.padrinho.patente + " " + x.padrinho.nome : "a definir");
+      return "• " + x.aluno.patente + " " + x.aluno.nome + " → " + (x.padrinho ? (x.padrinho.patente ? x.padrinho.patente + " " : "") + x.padrinho.nome : "a definir");
     }).join("\n") + "\n\nPadrinhos: façam uma patrulha guiada com seu afilhado antes da recuperação.";
     copiar(texto, this, "Copiar padrinhos");
   });
@@ -825,8 +854,21 @@
   });
   function enviarEfetivo(f, tipo) {
     var v = function (n) { return encodeURIComponent(f.elements[n] ? f.elements[n].value.trim() : ""); };
-    return "&efetivo=" + tipo + "&nome=" + v("nome") + "&id=" + v("id") + "&patente=" + v("patente") + "&obs=" + v("obs");
+    // Ao editar, mantém o padrinho já escolhido (ele mora na Observação).
+    var antigo = tipo === "editar" ? (dados.efetivo || []).filter(function (o) { return String(o.linha) === f.getAttribute("data-linha"); })[0] : null;
+    var obs = obsCom(f.elements.obs ? f.elements.obs.value : "", padrinhoDe(antigo));
+    return "&efetivo=" + tipo + "&nome=" + v("nome") + "&id=" + v("id") + "&patente=" + v("patente") + "&obs=" + encodeURIComponent(obs);
   }
+  $("efetivo").addEventListener("change", function (ev) {
+    var s = ev.target.closest("[data-padrinho-linha]");
+    if (!s) return;
+    var o = (dados.efetivo || []).filter(function (x) { return String(x.linha) === s.getAttribute("data-padrinho-linha"); })[0];
+    if (!o) return;
+    s.disabled = true;
+    carregar(lerSenha(), false, undefined, "&efetivo=editar&nome=" + encodeURIComponent(o.nome) + "&id=" + encodeURIComponent(o.id) +
+      "&patente=" + encodeURIComponent(o.patente || "") + "&obs=" + encodeURIComponent(obsCom(obsLimpa(o), s.value)) +
+      "&linha=" + o.linha + "&antes=" + encodeURIComponent(o.nome));
+  });
   $("efetivo-novo").addEventListener("submit", function (ev) {
     ev.preventDefault();
     var f = this;

@@ -972,6 +972,7 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
 .tabela-efetivo td { vertical-align: top; }
 .tabela-efetivo .stamp { margin-right: 6px; }
 .tabela-efetivo .situacao-final { display: block; font-size: .85rem; color: var(--ink-soft); }
+.tabela-efetivo .padrinho-sel { font: inherit; font-size: .9rem; max-width: 220px; }
 .tabela-efetivo tr.editando td { background: rgba(169, 124, 47, .06); }
 .btn-sec.perigo { color: var(--blood); border-color: var(--blood); }
 .patentes-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
