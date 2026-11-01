@@ -262,11 +262,24 @@
       return melhores(dados.resultados.filter(function (r) { return r.prova === x.id && (!ocultar || !ehTeste(r)); }));
     });
     $("efetivo-cabecalho").innerHTML = "<th>Oficial</th><th>ID</th><th>Patente</th>" +
-      dados.provas.map(function (x) { return "<th>" + esc(x.curto) + "</th>"; }).join("") + "<th>Observação</th><th></th>";
+      dados.provas.map(function (x) { return "<th>" + esc(x.curto) + "</th>"; }).join("") + "<th>Padrinho</th><th>Observação</th><th></th>";
     var lista = efetivo.filter(function (o) {
       return (!pat || o.patente === pat) && (!busca || chave(o.nome + " " + o.id + " " + o.patente).indexOf(busca) >= 0);
     }).sort(function (a, b) { return (a.patente + a.nome).localeCompare(b.patente + b.nome, "pt-BR"); });
-    var colunas = 5 + dados.provas.length;
+    var colunas = 6 + dados.provas.length;
+    var ordenados = efetivo.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome, "pt-BR"); });
+    function seletorPadrinho(o) {
+      if (!o.id) return '<span class="cinza">sem ID</span>';
+      var existe = false;
+      var opcoes = ordenados.filter(function (x) { return x.id && x.linha !== o.linha; }).map(function (x) {
+        var sel = chave(x.id) === chave(o.padrinho);
+        if (sel) existe = true;
+        return '<option value="' + esc(x.id) + '"' + (sel ? " selected" : "") + ">" + esc((x.patente ? x.patente + " " : "") + x.nome) + "</option>";
+      }).join("");
+      return '<select class="padrinho-sel" data-linha="' + o.linha + '" data-antes="' + esc(o.nome) + '" aria-label="Padrinho de ' + esc(o.nome) + '">' +
+        '<option value="">Sem padrinho</option>' + opcoes + "</select>" +
+        (o.padrinho && !existe ? '<span class="selo-alerta">Padrinho saiu do Efetivo</span>' : "");
+    }
     $("efetivo").innerHTML = lista.length ? lista.map(function (o) {
       if (editandoEfetivo === o.linha) {
         return '<tr class="editando"><td colspan="' + colunas + '"><form class="efetivo-form" data-linha="' + o.linha + '" data-antes="' + esc(o.nome) + '">' +
@@ -285,7 +298,7 @@
           (av ? '<span class="situacao-final">' + esc(av.situacao) + "</span>" : "") + "</td>";
       }).join("");
       return "<tr><td><strong>" + esc(o.nome) + "</strong></td><td>" + esc(o.id) + "</td><td>" + esc(o.patente) + "</td>" + celulas +
-        '<td class="cinza">' + esc(o.obs) + '</td><td><button type="button" class="btn-sec" data-efetivo-editar="' + o.linha + '">Editar</button></td></tr>';
+        "<td>" + seletorPadrinho(o) + "</td>" + '<td class="cinza">' + esc(o.obs) + '</td><td><button type="button" class="btn-sec" data-efetivo-editar="' + o.linha + '">Editar</button></td></tr>';
     }).join("") : '<tr><td colspan="' + colunas + '" class="cinza">Ninguém neste filtro.</td></tr>';
   }
   var editandoEfetivo = null;
@@ -338,7 +351,20 @@
     var aprovados = Object.keys(m).map(function (k) { return m[k]; }).filter(function (r) { return r.aprovado; })
       .sort(function (a, b) { return b.nota - a.nota; });
     var uso = {};
-    return pendentesDeAprovacao(res).map(function (r) {
+    var efetivo = dados.efetivo || [];
+    function escolhidoDe(r) {
+      var o = efetivo.filter(function (x) { return chave(x.id) === chave(r.id); })[0];
+      if (!o || !o.padrinho) return null;
+      var p = efetivo.filter(function (x) { return chave(x.id) === chave(o.padrinho); })[0];
+      if (!p) return null;
+      var prova = m[chave(p.id)];
+      return { nome: p.nome, id: p.id, patente: p.patente, nota: prova ? prova.nota : null };
+    }
+    var pendentes = pendentesDeAprovacao(res);
+    pendentes.forEach(function (r) { var p = escolhidoDe(r); if (p) uso[idOficial(p)] = (uso[idOficial(p)] || 0) + 1; });
+    return pendentes.map(function (r) {
+      var escolhido = escolhidoDe(r);
+      if (escolhido) return { aluno: r, padrinho: escolhido, manual: true };
       var candidatos = aprovados.filter(function (a) { return chave(a.patente) === chave(r.patente); });
       if (!candidatos.length) candidatos = aprovados;
       candidatos = candidatos.slice().sort(function (a, b) { return (uso[idOficial(a)] || 0) - (uso[idOficial(b)] || 0) || b.nota - a.nota; });
@@ -360,7 +386,8 @@
     var pares = padrinhos(res);
     $("padrinhos").innerHTML = pares.length ? pares.map(function (x) {
       return "<li><strong>" + esc(x.aluno.patente + " " + x.aluno.nome) + "</strong> (" + x.aluno.nota + "%) → " +
-        (x.padrinho ? esc(x.padrinho.patente + " " + x.padrinho.nome) + " (" + x.padrinho.nota + "%)" : "sem aprovado disponível") + "</li>";
+        (x.padrinho ? esc(x.padrinho.patente + " " + x.padrinho.nome) + (x.padrinho.nota != null ? " (" + x.padrinho.nota + "%)" : "") +
+          ' <span class="cinza">· ' + (x.manual ? "escolhido" : "sugestão") + "</span>" : "sem aprovado disponível") + "</li>";
     }).join("") : '<li class="cinza">Ninguém precisa de padrinho: todos foram aprovados.</li>';
   }
 
@@ -843,6 +870,22 @@
       editandoEfetivo = null;
       carregar(lerSenha(), false, undefined, "&efetivo=remover&linha=" + f.getAttribute("data-linha") + "&antes=" + encodeURIComponent(f.getAttribute("data-antes")));
     }
+  });
+  $("efetivo").addEventListener("change", function (ev) {
+    var s = ev.target.closest(".padrinho-sel");
+    if (!s) return;
+    s.disabled = true;
+    carregar(lerSenha(), false, undefined, "&efetivo=padrinho&linha=" + s.getAttribute("data-linha") +
+      "&antes=" + encodeURIComponent(s.getAttribute("data-antes")) + "&padrinho=" + encodeURIComponent(s.value));
+  });
+  $("copiar-padrinhos-efetivo").addEventListener("click", function () {
+    var efetivo = dados.efetivo || [];
+    var linhas = efetivo.map(function (o) {
+      var p = o.padrinho && efetivo.filter(function (x) { return chave(x.id) === chave(o.padrinho); })[0];
+      return p ? "• " + (o.patente ? o.patente + " " : "") + o.nome + " → " + (p.patente ? p.patente + " " : "") + p.nome : "";
+    }).filter(String).sort(function (a, b) { return a.localeCompare(b, "pt-BR"); });
+    if (!linhas.length) { carga("Nenhum padrinho escolhido ainda."); return; }
+    copiar("🤝 **Padrinhos da Cavalaria**\n\n" + linhas.join("\n"), this, "Copiar padrinhos");
   });
   $("efetivo").addEventListener("submit", function (ev) {
     var f = ev.target.closest(".efetivo-form");

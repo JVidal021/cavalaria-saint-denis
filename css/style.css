@@ -1006,3 +1006,4 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
 .banco-questoes ul { list-style: none; margin: 0; padding: 0 0 0 6px; }
 .banco-questoes ul li.certa { font-weight: 700; color: #2f4a23; }
 .banco-questoes .letra { display: inline-block; width: 1.5em; font-variant: small-caps; font-weight: 700; color: var(--ink-soft); }
+.padrinho-sel { font: inherit; font-size: .92rem; max-width: 210px; padding: 3px 5px; border: 1px solid var(--ink-soft); background: var(--paper-light); color: var(--ink); }
