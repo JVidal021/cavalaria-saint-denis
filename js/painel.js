@@ -262,24 +262,11 @@
       return melhores(dados.resultados.filter(function (r) { return r.prova === x.id && (!ocultar || !ehTeste(r)); }));
     });
     $("efetivo-cabecalho").innerHTML = "<th>Oficial</th><th>ID</th><th>Patente</th>" +
-      dados.provas.map(function (x) { return "<th>" + esc(x.curto) + "</th>"; }).join("") + "<th>Padrinho</th><th>Observação</th><th></th>";
+      dados.provas.map(function (x) { return "<th>" + esc(x.curto) + "</th>"; }).join("") + "<th>Observação</th><th></th>";
     var lista = efetivo.filter(function (o) {
       return (!pat || o.patente === pat) && (!busca || chave(o.nome + " " + o.id + " " + o.patente).indexOf(busca) >= 0);
     }).sort(function (a, b) { return (a.patente + a.nome).localeCompare(b.patente + b.nome, "pt-BR"); });
-    var colunas = 6 + dados.provas.length;
-    var ordenados = efetivo.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome, "pt-BR"); });
-    function seletorPadrinho(o) {
-      if (!o.id) return '<span class="cinza">sem ID</span>';
-      var existe = false;
-      var opcoes = ordenados.filter(function (x) { return x.id && x.linha !== o.linha; }).map(function (x) {
-        var sel = chave(x.id) === chave(o.padrinho);
-        if (sel) existe = true;
-        return '<option value="' + esc(x.id) + '"' + (sel ? " selected" : "") + ">" + esc((x.patente ? x.patente + " " : "") + x.nome) + "</option>";
-      }).join("");
-      return '<select class="padrinho-sel" data-linha="' + o.linha + '" data-antes="' + esc(o.nome) + '" aria-label="Padrinho de ' + esc(o.nome) + '">' +
-        '<option value="">Sem padrinho</option>' + opcoes + "</select>" +
-        (o.padrinho && !existe ? '<span class="selo-alerta">Padrinho saiu do Efetivo</span>' : "");
-    }
+    var colunas = 5 + dados.provas.length;
     $("efetivo").innerHTML = lista.length ? lista.map(function (o) {
       if (editandoEfetivo === o.linha) {
         return '<tr class="editando"><td colspan="' + colunas + '"><form class="efetivo-form" data-linha="' + o.linha + '" data-antes="' + esc(o.nome) + '">' +
@@ -297,11 +284,33 @@
         return "<td>" + (r ? '<span class="stamp ' + (r.aprovado ? "ok" : "") + '">' + r.nota + "%</span>" : "") +
           (av ? '<span class="situacao-final">' + esc(av.situacao) + "</span>" : "") + "</td>";
       }).join("");
-      return "<tr><td><strong>" + esc(o.nome) + "</strong></td><td>" + esc(o.id) + "</td><td>" + esc(o.patente) + "</td>" + celulas +
-        "<td>" + seletorPadrinho(o) + "</td>" + '<td class="cinza">' + esc(o.obs) + '</td><td><button type="button" class="btn-sec" data-efetivo-editar="' + o.linha + '">Editar</button></td></tr>';
+      var linha = '<tr class="oficial' + (abertoEfetivo === o.linha ? " aberto" : "") + '" data-efetivo-abrir="' + o.linha + '" tabindex="0"><td><strong>' + esc(o.nome) + "</strong></td><td>" + esc(o.id) + "</td><td>" + esc(o.patente) + "</td>" + celulas +
+        '<td class="cinza">' + esc(o.obs) + '</td><td><button type="button" class="btn-sec" data-efetivo-editar="' + o.linha + '">Editar</button></td></tr>';
+      if (abertoEfetivo === o.linha) linha += '<tr class="ficha-oficial"><td colspan="' + colunas + '">' + blocoPadrinho(o) + "</td></tr>";
+      return linha;
     }).join("") : '<tr><td colspan="' + colunas + '" class="cinza">Ninguém neste filtro.</td></tr>';
   }
   var editandoEfetivo = null;
+  var abertoEfetivo = null; // linha do oficial com a ficha aberta na aba Efetivo
+
+  // Padrinho do oficial: escolha e lista de afilhados, nas fichas do Efetivo e de Oficiais.
+  function blocoPadrinho(o) {
+    var efetivo = dados.efetivo || [];
+    var existe = false;
+    var opcoes = efetivo.filter(function (x) { return x.id && x.linha !== o.linha; })
+      .sort(function (a, b) { return a.nome.localeCompare(b.nome, "pt-BR"); }).map(function (x) {
+        var sel = chave(x.id) === chave(o.padrinho);
+        if (sel) existe = true;
+        return '<option value="' + esc(x.id) + '"' + (sel ? " selected" : "") + ">" + esc((x.patente ? x.patente + " " : "") + x.nome) + "</option>";
+      }).join("");
+    var afilhados = efetivo.filter(function (x) { return o.id && chave(x.padrinho) === chave(o.id); })
+      .map(function (x) { return esc((x.patente ? x.patente + " " : "") + x.nome); });
+    return '<div class="ficha-padrinho"><label>Padrinho' +
+      (o.id ? '<select class="padrinho-sel" data-linha="' + o.linha + '" data-antes="' + esc(o.nome) + '"><option value="">Sem padrinho</option>' + opcoes + "</select>"
+        : ' <span class="cinza">informe o ID do oficial primeiro</span>') + "</label>" +
+      (o.padrinho && !existe ? '<span class="selo-alerta">Padrinho saiu do Efetivo</span>' : "") +
+      '<p class="cinza">Afilhados: ' + (afilhados.length ? afilhados.join(", ") : "nenhum") + "</p></div>";
+  }
 
   // ---------- Agenda: aplicações marcadas e nova aplicação ----------
   function iso(x) { return new Date(x.getTime() - x.getTimezoneOffset() * 6e4).toISOString().slice(0, 16); }
@@ -652,6 +661,11 @@
     }).join("") || '<li class="vazio">Nenhum pedido neste filtro.</li>';
   }
 
+  function padrinhoDaFicha(r) {
+    var o = (dados.efetivo || []).filter(function (x) { return r.id && chave(x.id) === chave(r.id); })[0];
+    return o ? blocoPadrinho(o) : "";
+  }
+
   function ficha(r) {
     var porTopico = {};
     r.respostas.forEach(function (x) { (porTopico[x.topico] = porTopico[x.topico] || []).push(x); });
@@ -665,7 +679,7 @@
       '<label>Patente<input name="patente" maxlength="40" value="' + esc(r.patente) + '" required></label>' +
       '<span class="corrigir-botoes"><button type="submit" class="btn-sec">Salvar</button>' +
       '<button type="button" class="btn-sec" data-cancelar>Cancelar</button></span></form>' +
-      historico(r) + formAvaliacao(r) + '<h4 class="respostas-titulo">Respostas da prova</h4>';
+      padrinhoDaFicha(r) + historico(r) + formAvaliacao(r) + '<h4 class="respostas-titulo">Respostas da prova</h4>';
     provaPorId(r.prova).topicos.forEach(function (t) {
       var itens = porTopico[t];
       if (!itens) return;
@@ -862,6 +876,13 @@
   $("efetivo").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-efetivo-editar]");
     if (b) { editandoEfetivo = Number(b.getAttribute("data-efetivo-editar")); desenharEfetivo(); return; }
+    var abrir = ev.target.closest("[data-efetivo-abrir]");
+    if (abrir) {
+      var n = Number(abrir.getAttribute("data-efetivo-abrir"));
+      abertoEfetivo = abertoEfetivo === n ? null : n;
+      desenharEfetivo();
+      return;
+    }
     if (ev.target.closest("[data-efetivo-cancelar]")) { editandoEfetivo = null; desenharEfetivo(); return; }
     var r = ev.target.closest("[data-efetivo-remover]");
     if (r) {
@@ -871,12 +892,18 @@
       carregar(lerSenha(), false, undefined, "&efetivo=remover&linha=" + f.getAttribute("data-linha") + "&antes=" + encodeURIComponent(f.getAttribute("data-antes")));
     }
   });
-  $("efetivo").addEventListener("change", function (ev) {
+  function salvarPadrinho(ev) {
     var s = ev.target.closest(".padrinho-sel");
     if (!s) return;
     s.disabled = true;
     carregar(lerSenha(), false, undefined, "&efetivo=padrinho&linha=" + s.getAttribute("data-linha") +
       "&antes=" + encodeURIComponent(s.getAttribute("data-antes")) + "&padrinho=" + encodeURIComponent(s.value));
+  }
+  $("efetivo").addEventListener("change", salvarPadrinho);
+  $("oficiais").addEventListener("change", salvarPadrinho);
+  $("efetivo").addEventListener("keydown", function (ev) {
+    var tr = ev.target.closest("[data-efetivo-abrir]");
+    if (tr && ev.target === tr && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); tr.click(); }
   });
   $("copiar-padrinhos-efetivo").addEventListener("click", function () {
     var efetivo = dados.efetivo || [];

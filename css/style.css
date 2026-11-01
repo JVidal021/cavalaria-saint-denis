@@ -1007,3 +1007,8 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
 .banco-questoes ul li.certa { font-weight: 700; color: #2f4a23; }
 .banco-questoes .letra { display: inline-block; width: 1.5em; font-variant: small-caps; font-weight: 700; color: var(--ink-soft); }
 .padrinho-sel { font: inherit; font-size: .92rem; max-width: 210px; padding: 3px 5px; border: 1px solid var(--ink-soft); background: var(--paper-light); color: var(--ink); }
+.tabela-efetivo tr.oficial { cursor: pointer; }
+.ficha-padrinho { margin: 4px 0 10px; }
+.ficha-padrinho label { display: inline-flex; align-items: center; gap: 8px; font-variant: small-caps; letter-spacing: .08em; font-weight: 700; color: var(--ink-soft); }
+.ficha-padrinho .padrinho-sel { font-variant: normal; letter-spacing: 0; font-weight: 400; max-width: 280px; }
+.ficha-padrinho p { margin: 4px 0 0; }
