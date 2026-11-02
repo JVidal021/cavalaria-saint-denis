@@ -126,11 +126,10 @@
       <form class="efetivo-novo" id="efetivo-novo">
         <label>Nome<input name="nome" maxlength="80" required></label>
         <label>ID fixo<input name="id" maxlength="30" required></label>
-        <label>Patente<input name="patente" maxlength="40" list="patentes"></label>
+        <label>Patente<select name="patente" id="efetivo-nova-patente" required></select></label>
         <label class="largo">Observação<input name="obs" maxlength="200"></label>
         <button type="submit" class="btn-sec">Incluir oficial</button>
       </form>
-      <datalist id="patentes"></datalist>
       <div class="filtros">
         <input type="search" id="efetivo-busca" placeholder="Buscar por nome, ID ou patente">
         <select id="efetivo-patente"></select>
@@ -162,7 +161,7 @@
             <label>Prova<select id="ag-prova"></select></label>
             <label>Início<input type="datetime-local" id="ag-inicio"></label>
             <label>Fim<input type="datetime-local" id="ag-fim"></label>
-            <label class="largo">Somente estes IDs <span class="cinza">(vazio = aberta a todos)</span><textarea id="ag-ids" rows="2"></textarea></label>
+            <label class="largo">Somente estes IDs <span class="cinza">(vazio = as patentes da prova, conferidas no Efetivo)</span><textarea id="ag-ids" rows="2"></textarea></label>
             <label class="largo">Observação<input id="ag-obs" maxlength="120" placeholder="Ex.: Promoção a Cabo"></label>
           </div>
           <p class="cinza">Liberar por patente (puxa os IDs do Efetivo):</p>
@@ -212,8 +211,8 @@
 </main>
 </div>
 <script src="js/layout.js"></script>
-<script src="js/prova-data.js?v=provas1"></script>
+<script src="js/prova-data.js?v=patente1"></script>
 <script src="js/agenda.js?v=provas1"></script>
-<script src="js/painel.js?v=padrinho2"></script>
+<script src="js/painel.js?v=patente2"></script>
 </body>
 </html>

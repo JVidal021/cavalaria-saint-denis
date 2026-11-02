@@ -70,14 +70,17 @@
     return montarSelecao(sel);
   }
 
-  // As questões só chegam se a prova estiver aberta na agenda (e, na recuperação, se o ID foi convocado).
+  // As questões só chegam se a prova estiver aberta na agenda e for a do oficial: o servidor confere
+  // o ID na lista da aplicação ou, sem lista, a patente dele no Efetivo.
   var idRecuperacao = "";
+  var patenteEfetivo = "";
   function buscar(id) {
     return Agenda.consultar(true, id).then(function (e) {
       if (!e.aberta) { fechada(Agenda.descrever(e)); return; }
-      if (e.restrita && !e.permitido) { pedirId(e, !!id); return; }
+      if (!e.permitido) { pedirId(e, !!id); return; }
       if (!e.modulos) { fechada(Agenda.descrever(e)); return; }
       idRecuperacao = id || "";
+      patenteEfetivo = e.patente || "";
       $("recuperacao-id").hidden = true;
       APLICACAO = e;
       var sufixo = "-" + (e.prova ? e.prova.id : "prova") + "-" + (e.inicio || "");
@@ -94,12 +97,25 @@
       fechada("Não foi possível consultar a agenda da prova. Verifique sua internet e recarregue a página.");
     });
   }
-  // Recuperação: pede o ID fixo antes de entregar as questões.
+  // Por que este ID não entra nesta aplicação.
+  function motivoRecusa(e) {
+    if (e.restrita) return ["Não convocado", "Este ID não está na lista desta aplicação. Confira o número ou procure um instrutor."];
+    if (!e.noEfetivo) return ["ID fora do Efetivo", "Este ID não está no Efetivo. Confira o número ou procure um instrutor."];
+    var patente = e.patente ? "Sua patente no Efetivo é <strong>" + esc(e.patente) + "</strong>. " : "";
+    if (e.suaProva) return ["Prova de outra patente", patente + "Sua prova é a <strong>" + esc(e.suaProva.nome) + "</strong>, não esta. Se a patente estiver errada, procure um instrutor."];
+    return ["Sem prova nesta patente", patente + "Ela não tem prova na carreira. Se estiver errada, procure um instrutor."];
+  }
+  // Pede o ID fixo antes de entregar as questões.
   function pedirId(e, recusado) {
-    statusTexto.innerHTML = Agenda.descrever(e);
+    statusTexto.innerHTML = Agenda.descrever(e) + (e.restrita ? "" : " Informe seu ID fixo para conferir se esta é a sua prova.");
     var caixa = $("recuperacao-id");
     caixa.hidden = false;
-    $("recuperacao-erro").hidden = !recusado;
+    var erro = $("recuperacao-erro");
+    erro.hidden = !recusado;
+    if (recusado) {
+      var motivo = motivoRecusa(e);
+      erro.innerHTML = '<span class="label">' + motivo[0] + "</span>" + motivo[1];
+    }
     var botao = caixa.querySelector("button");
     botao.disabled = false;
     botao.textContent = "Continuar";
@@ -142,9 +158,13 @@
     var id = "f-" + c.entry;
     var campo = el("div", { "class": "ficha-campo" });
     campo.appendChild(el("label", { "for": id }, esc(c.rotulo) + (c.obrigatorio ? "" : ' <span class="opc">(opcional)</span>')));
-    var input = el("input", { type: "text", id: id, name: "entry." + c.entry, autocomplete: "off" });
+    // Patente vem de lista fixa: travada na do Efetivo ou, para quem não está nele, escolhida na lista.
+    var input = c.rotulo === "Patente" && !patenteEfetivo
+      ? el("select", { id: id, name: "entry." + c.entry }, '<option value="">Selecione</option>' + P.patentes.map(function (x) { return "<option>" + esc(x) + "</option>"; }).join(""))
+      : el("input", { type: "text", id: id, name: "entry." + c.entry, autocomplete: "off" });
     if (c.obrigatorio) input.required = true;
     if (c.rotulo === "ID fixo" && idRecuperacao) { input.value = idRecuperacao; input.readOnly = true; }
+    if (c.rotulo === "Patente" && patenteEfetivo) { input.value = patenteEfetivo; input.readOnly = true; }
     campo.appendChild(input);
     ident.appendChild(campo);
   });
@@ -177,10 +197,10 @@
   var rascunho = ler(CHAVE_RASCUNHO) || {};
   Object.keys(rascunho).forEach(function (nome) {
     var campos = form.elements[nome];
-    if (!campos) return;
+    if (!campos || campos.readOnly) return;
     if (campos.length && campos[0] && campos[0].type === "radio") {
       [].forEach.call(campos, function (r) { r.checked = r.value === rascunho[nome]; });
-    } else if (campos.type === "text") {
+    } else if (campos.type === "text" || campos.type === "select-one") {
       campos.value = rascunho[nome];
     }
   });
@@ -190,7 +210,7 @@
     [].forEach.call(form.elements, function (e) {
       if (!e.name) return;
       if (e.type === "radio") { if (e.checked) dados[e.name] = e.value; }
-      else if (e.type === "text") dados[e.name] = e.value.trim();
+      else if (e.type === "text" || e.type === "select-one") dados[e.name] = e.value.trim();
     });
     return dados;
   }

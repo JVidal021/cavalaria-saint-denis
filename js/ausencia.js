@@ -2,6 +2,7 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var form = $("ausencia");
+  $("a-patente").innerHTML = '<option value="">Selecione</option>' + window.PROVA.patentes.map(function (x) { return "<option>" + x + "</option>"; }).join("");
   var erro = $("erro");
 
   function dataCurta(ms) {

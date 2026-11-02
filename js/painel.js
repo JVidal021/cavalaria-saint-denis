@@ -188,10 +188,11 @@
       $("presenca").innerHTML = ""; $("n-faltosos").textContent = "";
       return;
     }
-    // Chamados: os IDs liberados, ou todo o Efetivo se a aplicação foi aberta a todos.
+    // Chamados: os IDs liberados ou, sem lista, as patentes da prova. Aplicações antigas eram abertas a todo o Efetivo.
+    var patentesProva = provaPorId(j.prova).patentes || [];
     var chamados = j.ids && j.ids.length
       ? j.ids.map(function (id) { return efetivo.filter(function (o) { return chave(o.id) === id; })[0] || { nome: "(fora do Efetivo)", id: id, patente: "" }; })
-      : efetivo;
+      : j.inicio < INICIO_POR_PATENTE ? efetivo : efetivo.filter(function (o) { return patentesProva.indexOf(o.patente) >= 0; });
     var ocultar = $("ocultar-testes").checked;
     var envios = dados.resultados.filter(function (r) {
       return r.prova === j.prova && r.quando >= j.inicio && r.quando <= j.fim + 15 * 6e4 && (!ocultar || !ehTeste(r));
@@ -220,7 +221,7 @@
     $("n-faltosos").classList.toggle("alerta", ultima && faltou.length > 0);
     $("presenca-ajuda").innerHTML = "<strong>" + esc(provaPorId(j.prova).nome) + "</strong>, " + quando(j.inicio) + " até " + quando(j.fim) + ". " +
       (j.ids && j.ids.length ? "Aplicação só para <strong>" + j.ids.length + "</strong> convocado(s)." :
-        "Aberta a todos: conferida contra o Efetivo, com <strong>" + efetivo.length + "</strong> oficiais.") +
+        (j.inicio < INICIO_POR_PATENTE ? "Aberta a todos" : "Aberta às patentes da prova") + ": conferida contra o Efetivo, com <strong>" + chamados.length + "</strong> oficiais.") +
       (!efetivo.length && !(j.ids && j.ids.length) ? " O Efetivo está vazio; ele se preenche sozinho com quem envia prova ou justificativa, e você completa na aba Efetivo." : "");
     function nome(o) { return esc((o.patente ? o.patente + " " : "") + o.nome) + (o.id ? ' <span class="cinza">· ID ' + esc(o.id) + "</span>" : ""); }
     function grupo(titulo, classe, itens, linha, botao) {
@@ -247,12 +248,9 @@
   function desenharEfetivo() {
     var efetivo = dados.efetivo || [];
     var busca = chave($("efetivo-busca").value), pat = $("efetivo-patente").value;
-    var patentes = [];
-    efetivo.forEach(function (o) { if (o.patente && patentes.indexOf(o.patente) < 0) patentes.push(o.patente); });
-    patentes.sort(function (a, b) { return a.localeCompare(b, "pt-BR"); });
-    var opcoes = '<option value="">Todas as patentes</option>' + patentes.map(function (x) { return "<option>" + esc(x) + "</option>"; }).join("");
+    var opcoes = '<option value="">Todas as patentes</option>' + window.PROVA.patentes.map(function (x) { return "<option>" + esc(x) + "</option>"; }).join("");
     if ($("efetivo-patente").innerHTML !== opcoes) { $("efetivo-patente").innerHTML = opcoes; $("efetivo-patente").value = pat; }
-    $("patentes").innerHTML = patentes.map(function (x) { return '<option value="' + esc(x) + '">'; }).join("");
+    if (!$("efetivo-nova-patente").options.length) $("efetivo-nova-patente").innerHTML = opcoesPatente("");
     $("n-efetivo").textContent = efetivo.length || "";
     $("efetivo-ajuda").innerHTML = "<strong>" + efetivo.length + "</strong> oficiais na aba Efetivo da planilha." +
       (dados.efetivoIncluidos ? " <strong>" + dados.efetivoIncluidos + "</strong> entraram agora, a partir das provas e ausências enviadas." : "") +
@@ -265,14 +263,14 @@
       dados.provas.map(function (x) { return "<th>" + esc(x.curto) + "</th>"; }).join("") + "<th>Observação</th><th></th>";
     var lista = efetivo.filter(function (o) {
       return (!pat || o.patente === pat) && (!busca || chave(o.nome + " " + o.id + " " + o.patente).indexOf(busca) >= 0);
-    }).sort(function (a, b) { return (a.patente + a.nome).localeCompare(b.patente + b.nome, "pt-BR"); });
+    }).sort(function (a, b) { return ordemPatente(a.patente) - ordemPatente(b.patente) || a.nome.localeCompare(b.nome, "pt-BR"); });
     var colunas = 5 + dados.provas.length;
     $("efetivo").innerHTML = lista.length ? lista.map(function (o) {
       if (editandoEfetivo === o.linha) {
         return '<tr class="editando"><td colspan="' + colunas + '"><form class="efetivo-form" data-linha="' + o.linha + '" data-antes="' + esc(o.nome) + '">' +
           '<label>Nome<input name="nome" maxlength="80" value="' + esc(o.nome) + '" required></label>' +
           '<label>ID fixo<input name="id" maxlength="30" value="' + esc(o.id) + '" required></label>' +
-          '<label>Patente<input name="patente" maxlength="40" list="patentes" value="' + esc(o.patente) + '"></label>' +
+          '<label>Patente<select name="patente" required>' + opcoesPatente(o.patente) + '</select></label>' +
           '<label class="largo">Observação<input name="obs" maxlength="200" value="' + esc(o.obs) + '"></label>' +
           '<span class="corrigir-botoes"><button type="submit" class="btn-sec">Salvar</button>' +
           '<button type="button" class="btn-sec" data-efetivo-cancelar>Cancelar</button>' +
@@ -291,6 +289,19 @@
     }).join("") : '<tr><td colspan="' + colunas + '" class="cinza">Ninguém neste filtro.</td></tr>';
   }
   var editandoEfetivo = null;
+  // Opções da lista fixa de patentes. Valor antigo fora da lista obriga a escolher uma válida.
+  function opcoesPatente(atual) {
+    var marcada = window.PROVA.patentes.filter(function (x) { return chave(x) === chave(atual); })[0] || "";
+    return '<option value="">Selecione</option>' + window.PROVA.patentes.map(function (x) {
+      return "<option" + (x === marcada ? " selected" : "") + ">" + esc(x) + "</option>";
+    }).join("");
+  }
+  // Posição na hierarquia; patente fora da lista fica no fim.
+  function ordemPatente(p) {
+    var i = window.PROVA.patentes.map(chave).indexOf(chave(p));
+    return i < 0 ? 99 : i;
+  }
+  var INICIO_POR_PATENTE = Date.parse("2026-11-02T00:00:00-03:00"); // a partir daqui, aplicação sem lista vale só para as patentes da prova
   var abertoEfetivo = null; // linha do oficial com a ficha aberta na aba Efetivo
 
   // Padrinho do oficial: escolha e lista de afilhados, nas fichas do Efetivo e de Oficiais.
@@ -342,7 +353,7 @@
       var estado = j.fim <= agora ? "encerrada" : j.inicio <= agora ? "aberta" : "marcada";
       return '<li class="aplicacao ' + estado + '"><div><strong>' + esc(provaPorId(j.prova).nome) + "</strong> · " + quando(j.inicio) + " até " + quando(j.fim) +
         ' <span class="stamp ' + (estado === "aberta" ? "ok" : estado === "marcada" ? "pendente" : "") + '">' + estado.toUpperCase() + "</span>" +
-        '<p class="cinza">' + (j.ids && j.ids.length ? "Só " + j.ids.length + " convocado(s): " + esc(j.ids.map(nomeDoId).join(", ")) : "Aberta a todos") +
+        '<p class="cinza">' + (j.ids && j.ids.length ? "Só " + j.ids.length + " convocado(s): " + esc(j.ids.map(nomeDoId).join(", ")) : "Patentes da prova: " + esc((provaPorId(j.prova).patentes || []).join(", "))) +
         (j.obs ? " · " + esc(j.obs) : "") + "</p></div>" +
         '<span class="aplicacao-botoes">' +
         (estado !== "encerrada" ? '<button type="button" class="btn-sec" data-editar-aplicacao="' + j.linha + '" data-inicio="' + j.inicio + '">Editar</button>' : "") +
@@ -676,7 +687,7 @@
       '<form class="corrigir-form" data-linha="' + r.linha + '" data-antes="' + esc(r.nome) + '" hidden>' +
       '<label>Nome<input name="nome" maxlength="80" value="' + esc(r.nome) + '" required></label>' +
       '<label>ID fixo<input name="id" maxlength="30" value="' + esc(r.id) + '" required></label>' +
-      '<label>Patente<input name="patente" maxlength="40" value="' + esc(r.patente) + '" required></label>' +
+      '<label>Patente<select name="patente" required>' + opcoesPatente(r.patente) + '</select></label>' +
       '<span class="corrigir-botoes"><button type="submit" class="btn-sec">Salvar</button>' +
       '<button type="button" class="btn-sec" data-cancelar>Cancelar</button></span></form>' +
       padrinhoDaFicha(r) + historico(r) + formAvaliacao(r) + '<h4 class="respostas-titulo">Respostas da prova</h4>';
@@ -944,7 +955,7 @@
     if (!ini || !fim || fim <= ini) { carga("Confira o horário de início e fim."); return; }
     var n = ids ? ids.split(/[,;\s]+/).filter(String).length : 0;
     var editando = editandoAplicacao;
-    if (!window.confirm((editando ? "Salvar a aplicação como " : "Agendar a ") + prova.nome + " de " + quando(ini) + " até " + quando(fim) + (n ? ", só para " + n + " oficial(is)?" : ", aberta a todos?"))) return;
+    if (!window.confirm((editando ? "Salvar a aplicação como " : "Agendar a ") + prova.nome + " de " + quando(ini) + " até " + quando(fim) + (n ? ", só para " + n + " oficial(is)?" : ", aberta às patentes " + (prova.patentes || []).join(", ") + "?"))) return;
     var acao = editando ? "&editar_aplicacao=" + editando.linha + "&inicio_antes=" + editando.inicio : "&agendar=1";
     carregar(lerSenha(), false, undefined, acao + "&prova=" + encodeURIComponent(prova.id) + "&inicio=" + ini + "&fim=" + fim +
       "&ids=" + encodeURIComponent(ids) + "&obs=" + encodeURIComponent($("ag-obs").value.trim())).then(function () {

@@ -3,6 +3,20 @@ window.PROVA = {
  "api": "https://script.google.com/macros/s/AKfycbxZuPJ7j-xfCwEAuJxcsvm9dc02KAW3j3tvBGLLlRXvBceFivF_5WZF0qXcHXeCB4eu/exec",
  "acao": "https://docs.google.com/forms/d/e/1FAIpQLSeBbxQwgOUC-6jo5yXNaYNHs8GloC11bWk78EuSE7DKTy3Bdw/formResponse",
  "paginas": 16,
+ "patentes": [
+  "Delegado Regional",
+  "Sub-Delegado Regional",
+  "Sheriff",
+  "Sub-Sheriff",
+  "Capitão",
+  "Tenente",
+  "Oficial Sênior",
+  "Oficial",
+  "Oficial Júnior",
+  "Aspirante",
+  "Cadete",
+  "Recruta"
+ ],
  "provas": [
   {
    "id": "iniciais",

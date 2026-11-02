@@ -968,7 +968,7 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
 .efetivo-novo, .efetivo-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin: 10px 0 12px; padding: 10px 12px; border: 1px dashed var(--brass); background: rgba(169, 124, 47, .08); }
 .efetivo-novo label, .efetivo-form label { display: flex; flex-direction: column; gap: 2px; font-variant: small-caps; letter-spacing: .08em; font-weight: 700; color: var(--ink-soft); flex: 1 1 140px; }
 .efetivo-novo label.largo, .efetivo-form label.largo { flex: 2 1 240px; }
-.efetivo-novo input, .efetivo-form input { font: inherit; font-variant: normal; letter-spacing: 0; font-weight: 400; color: var(--ink); padding: 5px 8px; border: 1px solid var(--ink-soft); background: var(--paper-light); }
+.efetivo-novo input, .efetivo-form input, .efetivo-novo select, .efetivo-form select { font: inherit; font-variant: normal; letter-spacing: 0; font-weight: 400; color: var(--ink); padding: 5px 8px; border: 1px solid var(--ink-soft); background: var(--paper-light); }
 .tabela-efetivo td { vertical-align: top; }
 .tabela-efetivo .stamp { margin-right: 6px; }
 .tabela-efetivo .situacao-final { display: block; font-size: .85rem; color: var(--ink-soft); }
