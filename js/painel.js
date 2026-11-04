@@ -165,16 +165,18 @@
   }
   function desenharQuem() {
     var q = bruto.quem || { nome: "", regiao: "", todas: true, geral: true };
-    $("quem").innerHTML = "Entrou como <strong>" + esc(q.geral ? (autor() || "senha geral") : q.nome) + "</strong> · " +
-      (q.regiao ? "região <strong>" + esc(q.regiao) + "</strong>" : "acesso a <strong>todas as regiões</strong>");
+    $("quem").innerHTML = q.geral
+      ? "Entrou com a <strong>senha geral</strong> · <strong>acesso total</strong> (todas as regiões, instrutores, divulgação e banco)"
+      : "Entrou como <strong>" + esc(q.nome) + "</strong> · altera só a região <strong>" + esc(q.regiao) + "</strong>; as outras aparecem só na comparação do Resumo";
     $("autor-campo").hidden = !q.geral;
     $("regiao-sel").innerHTML = opcoesRegiao(regiaoVista(), "Todas as regiões");
     $("regiao-sel").value = regiaoVista();
     $("regiao-sel").disabled = !!q.regiao;
-    $("instrutores-caixa").hidden = !q.todas;
+    $("instrutores-caixa").hidden = !q.geral;
     $("senha-caixa").hidden = !q.geral;
-    $("atualizar-banco").hidden = !q.todas;
-    if (q.todas) desenharInstrutores();
+    $("atualizar-banco").hidden = !q.geral;
+    $("divulgar").hidden = !q.geral;
+    if (q.geral) desenharInstrutores();
   }
   // Instrutores e códigos (só para quem cuida de todas as regiões).
   function desenharInstrutores() {
@@ -185,12 +187,30 @@
         '<button type="button" class="btn-sec" data-instrutor="' + (x.ativo ? "desativar" : "ativar") + '" data-linha="' + x.linha +
         '" data-antes="' + esc(x.nome) + '">' + (x.ativo ? "Desativar" : "Reativar") + "</button></li>";
     }).join("") : '<li class="cinza">Nenhum instrutor cadastrado ainda. Até lá, só a senha geral entra no painel.</li>';
-    if (!$("instrutor-regiao").options.length) $("instrutor-regiao").innerHTML = opcoesRegiao("", "Todas as regiões (comando)");
+    if (!$("instrutor-regiao").options.length) $("instrutor-regiao").innerHTML = opcoesRegiao("");
+  }
+
+  // Comparação: só números de cada região (o servidor não manda nomes das outras regiões a quem não é o dono).
+  function desenharComparacao() {
+    var lista = (bruto.comparacao || []).filter(function (c) { return c.oficiais || c.envios || c.proximas; });
+    var minha = bruto.quem && bruto.quem.regiao;
+    $("comparacao-ajuda").textContent = lista.length
+      ? "Situação de cada região na prova da patente de cada oficial. Média de todas as provas enviadas." + (minha ? " Sua região está destacada." : "")
+      : "Ainda não há oficiais com região definida.";
+    function n(v, alerta) { return '<td class="cost">' + (v ? (alerta ? '<strong class="alerta-num">' + v + "</strong>" : v) : '<span class="cinza">0</span>') + "</td>"; }
+    $("comparacao").innerHTML = lista.map(function (c) {
+      return '<tr' + (c.regiao === minha ? ' class="minha-regiao"' : "") + "><td><strong>" + esc(c.regiao) + "</strong>" +
+        (c.provisorios ? ' <span class="selo-provisorio">' + c.provisorios + " ID provisório</span>" : "") + "</td>" +
+        n(c.oficiais) + n(c.aprovados) + n(c.pendentes, true) + n(c.reprovados, true) + n(c.semProva) +
+        '<td class="cost">' + (c.media == null ? '<span class="cinza">—</span>' : c.media + "%") + "</td>" +
+        n(c.ausenciasPendentes, true) + n(c.proximas) + "</tr>";
+    }).join("");
   }
 
   function desenhar() {
     if (!dados.provas) return; // dados guardados de uma versão antiga do painel: espera os novos
     if (bruto.quem) desenharQuem();
+    desenharComparacao();
     desenharSeletorProva();
     var res = provas();
     var tentativas = {};
@@ -641,10 +661,12 @@
   // Divulgação: o Quadro de Honra público só mostra os aprovados depois deste botão.
   function desenharDivulgacao() {
     var prova = provaAtual();
+    $("resumo-titulo").textContent = prova.nome + (regiaoVista() ? " · " + regiaoVista() : "");
     var sim = (dados.divulgadas || []).indexOf(prova.id) >= 0;
     $("divulgacao-texto").innerHTML = sim
       ? 'Os aprovados da <strong>' + esc(prova.nome) + '</strong> estão <strong>publicados</strong> no <a href="resultados.html" target="_blank" rel="noopener">Quadro de Honra</a>.'
-      : 'Os resultados da <strong>' + esc(prova.nome) + '</strong> <strong>ainda não foram divulgados</strong> no Quadro de Honra.';
+      : 'Os resultados da <strong>' + esc(prova.nome) + '</strong> <strong>ainda não foram divulgados</strong> no Quadro de Honra.' +
+      (bruto.quem && !bruto.quem.geral ? ' A divulgação vale para todas as regiões e é feita pelo dono do painel.' : "");
     $("divulgar").textContent = sim ? "Ocultar resultados" : "Divulgar resultados";
     $("divulgar").setAttribute("data-valor", sim ? "0" : "1");
   }

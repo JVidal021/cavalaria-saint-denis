@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=regioes1">
+<link rel="stylesheet" href="css/style.css?v=regioes2">
 </head>
 <!-- Página restrita aos instrutores: sem menu, protegida por senha. -->
 <body data-page="painel" data-isolada>
@@ -58,6 +58,16 @@
     </nav>
 
     <div class="painel-aba" data-painel="resumo">
+      <h3 class="section">Comparação entre regiões</h3>
+      <p class="presenca-ajuda" id="comparacao-ajuda"></p>
+      <div class="table-wrap"><table class="tabela-comparacao">
+        <thead><tr><th>Região</th><th style="text-align:right">Oficiais</th><th style="text-align:right">Aprovados</th>
+          <th style="text-align:right">Prova pendente</th><th style="text-align:right">Reprovados</th><th style="text-align:right">Sem prova</th>
+          <th style="text-align:right">Média</th><th style="text-align:right">Ausências pendentes</th><th style="text-align:right">Próximas aplicações</th></tr></thead>
+        <tbody id="comparacao"></tbody>
+      </table></div>
+
+      <h3 class="section" id="resumo-titulo">Prova escolhida no topo</h3>
       <div class="placar" id="placar"></div>
 
       <div class="divulgacao">
@@ -212,7 +222,7 @@
       <details class="recuperacao" id="instrutores-caixa" hidden>
         <summary>Instrutores e códigos de acesso</summary>
         <div class="recuperacao-corpo">
-          <p class="cinza">Cada instrutor entra com o próprio código e só vê e altera a região dele. "Todas as regiões" é para o comando. O código aparece aqui só para quem cuida de todas as regiões.</p>
+          <p class="cinza">Cada instrutor entra com o próprio código e só vê e altera a região dele; das outras regiões, vê apenas os números da comparação no Resumo. Acesso total é só da senha geral, que é sua.</p>
           <ul class="instrutores" id="instrutores"></ul>
           <form id="instrutor-novo" class="recuperacao-campos">
             <label>Nome<input name="nome" maxlength="60" required></label>
@@ -236,9 +246,9 @@
 
 </main>
 </div>
-<script src="js/prova-data.js?v=regioes1"></script>
-<script src="js/layout.js?v=regioes1"></script>
-<script src="js/agenda.js?v=regioes1"></script>
-<script src="js/painel.js?v=regioes1"></script>
+<script src="js/prova-data.js?v=regioes2"></script>
+<script src="js/layout.js?v=regioes2"></script>
+<script src="js/agenda.js?v=regioes2"></script>
+<script src="js/painel.js?v=regioes2"></script>
 </body>
 </html>

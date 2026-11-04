@@ -1070,3 +1070,7 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
 .instrutores li { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--rule); }
 .instrutores li.inativo { opacity: .55; }
 .instrutores code { font-family: var(--f-type); background: var(--paper-light); padding: 0 6px; border: 1px solid var(--rule); }
+
+/* Comparação entre regiões (Resumo do painel) */
+.tabela-comparacao tr.minha-regiao td { background: rgba(169, 124, 47, .18); }
+.tabela-comparacao .alerta-num { color: var(--blood); }
