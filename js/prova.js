@@ -74,6 +74,7 @@
   // o ID na lista da aplicação ou, sem lista, a patente dele no Efetivo.
   var idRecuperacao = "";
   var patenteEfetivo = "";
+  var regiaoOficial = ""; // a do Efetivo ou a da aplicação; vazia = o oficial escolhe na ficha
   function buscar(id) {
     return Agenda.consultar(true, id).then(function (e) {
       if (!e.aberta) { fechada(Agenda.descrever(e)); return; }
@@ -81,6 +82,7 @@
       if (!e.modulos) { fechada(Agenda.descrever(e)); return; }
       idRecuperacao = id || "";
       patenteEfetivo = e.patente || "";
+      regiaoOficial = e.regiao || e.regiaoAplicacao || "";
       $("recuperacao-id").hidden = true;
       APLICACAO = e;
       var sufixo = "-" + (e.prova ? e.prova.id : "prova") + "-" + (e.inicio || "");
@@ -135,7 +137,7 @@
     if (!prova) return;
     var info = (P.provas || []).filter(function (x) { return x.id === prova.id; })[0] || {};
     $("prova-titulo").textContent = prova.nome;
-    document.title = prova.nome + " · Cavalaria SD";
+    document.title = prova.nome + " · Cavalaria";
     var n = e.modulos ? e.modulos.length * (e.sorteio || info.sorteio || 4) : info.totalQuestoes;
     $("prova-lead").textContent = (n ? n + " questões objetivas, " + (e.sorteio || info.sorteio) + " de cada tópico, sorteadas para você. " : "") +
       "Nota mínima: " + (e.notaMinima || info.notaMinima) + "%.";
@@ -168,6 +170,15 @@
     campo.appendChild(input);
     ident.appendChild(campo);
   });
+  // Região: travada quando já se sabe (Efetivo ou aplicação da região); senão, escolhida na lista.
+  var campoRegiao = el("div", { "class": "ficha-campo" });
+  campoRegiao.appendChild(el("label", { "for": "f-regiao" }, "Região"));
+  var selRegiao = regiaoOficial
+    ? el("input", { type: "text", id: "f-regiao", name: "regiao", value: regiaoOficial, readonly: "" })
+    : el("select", { id: "f-regiao", name: "regiao", required: "" }, '<option value="">Selecione</option>' +
+      (P.regioes || []).map(function (x) { return "<option>" + esc(x) + "</option>"; }).join(""));
+  campoRegiao.appendChild(selRegiao);
+  ident.appendChild(campoRegiao);
 
   var area = document.getElementById("questoes");
   var n = 0;
@@ -244,6 +255,9 @@
       input.classList.toggle("faltando", vazio);
       if (vazio) faltas.push(input);
     });
+    var semRegiao = !d.regiao;
+    $("f-regiao").classList.toggle("faltando", semRegiao);
+    if (semRegiao) faltas.push($("f-regiao"));
     var k = 0;
     MODULOS.forEach(function (m) {
       m.questoes.forEach(function (q) {
@@ -293,11 +307,12 @@
     // Formulário oculto que posta direto no Google Forms (todas as páginas de uma vez).
     var envioForm = el("form", { action: P.acao, method: "POST", target: "prova-destino", hidden: "" });
     Object.keys(d).forEach(function (nome) {
-      if (d[nome]) envioForm.appendChild(el("input", { type: "hidden", name: nome, value: d[nome] }));
+      if (d[nome] && nome.indexOf("entry.") === 0) envioForm.appendChild(el("input", { type: "hidden", name: nome, value: d[nome] }));
     });
-    // Campo "Prova" do formulário: diz ao corretor qual prova o oficial fez.
+    // Campo "Prova" do formulário: diz ao corretor qual prova o oficial fez e de qual região ele é ("Prova | Região").
     if (APLICACAO.campoProva && APLICACAO.prova) {
-      envioForm.appendChild(el("input", { type: "hidden", name: "entry." + APLICACAO.campoProva, value: APLICACAO.prova.curto }));
+      envioForm.appendChild(el("input", { type: "hidden", name: "entry." + APLICACAO.campoProva,
+        value: APLICACAO.prova.curto + (d.regiao ? " | " + d.regiao : "") }));
     }
     var paginas = [];
     for (var i = 0; i < (APLICACAO.paginas || P.paginas); i++) paginas.push(i);

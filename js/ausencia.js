@@ -3,6 +3,9 @@
   var $ = function (id) { return document.getElementById(id); };
   var form = $("ausencia");
   $("a-patente").innerHTML = '<option value="">Selecione</option>' + window.PROVA.patentes.map(function (x) { return "<option>" + x + "</option>"; }).join("");
+  var regioes = window.PROVA.regioes || [];
+  $("a-regiao").innerHTML = '<option value="">Selecione</option>' + regioes.map(function (x) { return "<option>" + x + "</option>"; }).join("");
+  if (window.Cavalaria && window.Cavalaria.regiao) $("a-regiao").value = window.Cavalaria.regiao;
   var erro = $("erro");
 
   function dataCurta(ms) {
@@ -14,13 +17,14 @@
   // Datas da Agenda: aplicações recentes e próximas. O rótulo começa pela data (o painel casa por ela).
   Agenda.consultar(false).then(function (e) {
     var opcoes = (e.aplicacoes || []).map(function (j) {
-      var rotulo = dataCurta(j.inicio) + (j.prova ? " · " + j.prova.curto : "");
+      var rotulo = dataCurta(j.inicio) + (j.prova ? " · " + j.prova.curto : "") + (j.regiao ? " · " + j.regiao : "");
       return '<option value="' + rotulo + '">' + rotulo + (j.fim < Date.now() ? " (já aplicada)" : "") + "</option>";
     });
     $("a-aplicacao").innerHTML = '<option value="">Escolha…</option>' + opcoes.join("") +
       '<option value="Outra data">Outra data (explique na justificativa)</option>';
-    var proxima = (e.aplicacoes || []).filter(function (j) { return j.fim > Date.now(); })[0];
-    if (proxima) $("a-aplicacao").value = dataCurta(proxima.inicio) + (proxima.prova ? " · " + proxima.prova.curto : "");
+    var minha = window.Cavalaria && window.Cavalaria.regiao;
+    var proxima = (e.aplicacoes || []).filter(function (j) { return j.fim > Date.now() && (!minha || !j.regiao || j.regiao === minha); })[0];
+    if (proxima) $("a-aplicacao").value = dataCurta(proxima.inicio) + (proxima.prova ? " · " + proxima.prova.curto : "") + (proxima.regiao ? " · " + proxima.regiao : "");
   }).catch(function () {
     $("a-aplicacao").innerHTML = '<option value="">Escolha…</option><option value="Outra data">Data informada na justificativa</option>';
   });
@@ -31,7 +35,7 @@
 
   form.addEventListener("submit", function (ev) {
     ev.preventDefault();
-    var campos = ["a-nome", "a-id", "a-patente", "a-aplicacao", "a-motivo", "a-justificativa"];
+    var campos = ["a-nome", "a-id", "a-patente", "a-regiao", "a-aplicacao", "a-motivo", "a-justificativa"];
     var faltando = campos.filter(function (id) {
       var vazio = !$(id).value.trim() || (id === "a-justificativa" && $(id).value.trim().length < 10);
       $(id).classList.toggle("faltando", vazio);
@@ -48,7 +52,7 @@
     botao.disabled = true;
     botao.textContent = "Enviando…";
     var dados = {
-      tipo: "ausencia", nome: $("a-nome").value, id: $("a-id").value, patente: $("a-patente").value,
+      tipo: "ausencia", nome: $("a-nome").value, id: $("a-id").value, patente: $("a-patente").value, regiao: $("a-regiao").value,
       discord: $("a-discord").value, aplicacao: $("a-aplicacao").value, motivo: $("a-motivo").value,
       justificativa: $("a-justificativa").value
     };

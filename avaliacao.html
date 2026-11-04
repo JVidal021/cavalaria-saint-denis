@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Provas da Cavalaria · Cavalaria SD</title>
+<title>Provas da Cavalaria · Cavalaria</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=provas3">
+<link rel="stylesheet" href="css/style.css?v=regioes1">
 </head>
 <body data-page="avaliacao">
 <div class="sheet">
@@ -16,7 +16,7 @@
   <section class="hero">
     <span class="kicker">Avaliação Oficial</span>
     <h2>Provas da Cavalaria</h2>
-    <p class="hero-sub">de Saint Denis</p>
+    <p class="hero-sub">de todas as regiões</p>
     <p class="lead">Avaliações escritas dos cursos e da promoção, aplicadas nas datas definidas pelos instrutores.</p>
     <span data-ornament></span>
   </section>
@@ -32,12 +32,13 @@
     <a class="course" href="resultados.html">Quadro de Honra · Aprovados</a>
     <a class="course" href="ausencia.html">Justificar ausência</a>
     <a class="course" href="simulado.html">Simulado de treino</a>
+    <a class="course" href="situacao.html">Minha situação</a>
   </p>
 
   <h3 class="section">Instruções</h3>
   <ol class="steps">
     <li>A prova só abre <strong>no dia e horário</strong> informados pelos instrutores. Fora disso, ela fica fechada.</li>
-    <li>A prova pede o seu <strong>ID fixo</strong> antes de abrir e confere a sua patente no Efetivo: cada oficial só faz a prova da própria patente. Se a sua estiver errada, procure um instrutor.</li>
+    <li>A prova pede o seu <strong>ID fixo</strong> antes de abrir e confere a sua patente e a sua região no Efetivo: cada oficial só faz a prova da própria patente, nas aplicações da sua região. Confira tudo em <a href="situacao.html">Minha situação</a>; se algo estiver errado, procure um instrutor da sua região.</li>
     <li>Algumas aplicações são <strong>só para os oficiais convocados</strong> (recuperação e promoção), mesmo de outras patentes.</li>
     <li>Durante a prova, <strong>o material não fica disponível</strong>: a página da prova não tem menu nem links. Estude antes.</li>
     <li>Responda <strong>sozinho e sem consultar</strong>. Preencha nome, ID fixo e patente exatamente como estão no MDT.</li>
@@ -69,9 +70,9 @@
 
 </main>
 </div>
-<script src="js/layout.js"></script>
-<script src="js/prova-data.js?v=patente1"></script>
-<script src="js/agenda.js?v=provas1"></script>
+<script src="js/prova-data.js?v=regioes1"></script>
+<script src="js/layout.js?v=regioes1"></script>
+<script src="js/agenda.js?v=regioes1"></script>
 <script>
   (function () {
     function esc(t) { var d = document.createElement("div"); d.textContent = t == null ? "" : t; return d.innerHTML; }
@@ -100,11 +101,12 @@
       texto.innerHTML = Agenda.descrever(e);
       bloquear(!e.aberta);
       // Próximas aplicações, com a prova de cada uma.
-      var futuras = (e.aplicacoes || []).filter(function (j) { return j.inicio > Date.now(); });
+      var minha = window.Cavalaria && window.Cavalaria.regiao;
+      var futuras = (e.aplicacoes || []).filter(function (j) { return j.inicio > Date.now() && (!minha || !j.regiao || j.regiao === minha); });
       var lista = document.getElementById("agenda-lista");
       lista.hidden = futuras.length < 2;
       lista.innerHTML = futuras.map(function (j) {
-        return "<li><strong>" + esc(j.prova ? j.prova.nome : "Prova") + "</strong> · " + Agenda.formatar(j.inicio) + " até " + Agenda.hora(j.fim) +
+        return "<li><strong>" + esc(j.prova ? j.prova.nome : "Prova") + "</strong>" + (j.regiao ? " · " + esc(j.regiao) : "") + " · " + Agenda.formatar(j.inicio) + " até " + Agenda.hora(j.fim) +
           (j.restrita ? ' <span class="cinza">(só convocados)</span>' : "") + "</li>";
       }).join("");
     }).catch(function () {

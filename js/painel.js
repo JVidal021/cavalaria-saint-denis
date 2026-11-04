@@ -6,8 +6,10 @@
   var CHAVE_ABA = "cavalaria-painel-aba";
   var CHAVE_AUTOR = "cavalaria-painel-autor";
   var CHAVE_PROVA = "cavalaria-painel-prova";
+  var CHAVE_REGIAO = "cavalaria-painel-regiao";
   var ROTULO_ORAL = { completa: "Completa", parcial: "Parcial", nao: "Não soube" };
-  var dados = null;
+  var bruto = null; // dados como vieram do servidor (já só da região de quem não é do comando)
+  var dados = null; // os mesmos dados, recortados pela região escolhida no topo
   var bancoVisto = null; // banco com gabarito, só quando o instrutor pede
   var editandoAplicacao = null; // { linha, inicio } da aplicação em edição na aba Agenda
   var aberto = null; // linha do oficial expandida
@@ -93,12 +95,13 @@
           $("entrar").hidden = false;
           $("painel").hidden = true;
           $("entrar-erro").hidden = false;
-          $("entrar-erro").innerHTML = '<span class="label">Acesso negado</span>Senha incorreta.';
+          $("entrar-erro").innerHTML = '<span class="label">Acesso negado</span>Código incorreto ou desativado.';
           return;
         }
         if (r.banco) { bancoVisto = r.banco; delete r.banco; }
         guardar(senha, r, lembrar);
-        dados = r;
+        bruto = r;
+        dados = recortar();
         carga(r.aviso || "Atualizado às " + new Date(r.geradoEm || Date.now()).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }));
         $("entrar").hidden = true;
         $("painel").hidden = false;
@@ -114,7 +117,7 @@
   }
 
   // ---------- Abas ----------
-  function abaAtual() { try { return sessionStorage.getItem(CHAVE_ABA) || "resumo"; } catch (e) { return "resumo"; } }
+  function abaAtual() { try { return sessionStorage.getItem(CHAVE_ABA) || "efetivo"; } catch (e) { return "efetivo"; } }
   function mostrarAba(nome) {
     try { sessionStorage.setItem(CHAVE_ABA, nome); } catch (e) {}
     document.querySelectorAll(".aba").forEach(function (b) {
@@ -131,8 +134,63 @@
     return dados.resultados.filter(function (r) { return r.prova === prova && (!ocultar || !ehTeste(r)); });
   }
 
+  // ---------- Região vista no painel ----------
+  // Instrutor de uma região só recebe a dele; o comando escolhe uma região ou vê todas.
+  function regiaoVista() {
+    if (bruto && bruto.quem && bruto.quem.regiao) return bruto.quem.regiao;
+    try { return sessionStorage.getItem(CHAVE_REGIAO) || ""; } catch (e) { return ""; }
+  }
+  function recortar() {
+    var rv = regiaoVista(), r = bruto;
+    if (!rv || !r.quem || r.quem.regiao) return r;
+    function minha(x) { return x.regiao === rv; }
+    var c = Object.assign({}, r);
+    c.efetivo = (r.efetivo || []).filter(minha);
+    c.resultados = (r.resultados || []).filter(minha);
+    c.ausencias = (r.ausencias || []).filter(minha);
+    c.registro = (r.registro || []).filter(minha);
+    c.agenda = Object.assign({}, r.agenda, { janelas: (r.agenda.janelas || []).filter(function (j) { return !j.regiao || j.regiao === rv; }) });
+    return c;
+  }
+  function regioes() { return (bruto && bruto.regioes) || window.PROVA.regioes || []; }
+  // Opções de região; "todas" acrescenta a opção vazia com esse rótulo. Instrutor de uma região só tem a dele.
+  function opcoesRegiao(atual, todas) {
+    var q = bruto && bruto.quem;
+    if (q && q.regiao) return "<option>" + esc(q.regiao) + "</option>";
+    return (todas ? '<option value="">' + esc(todas) + "</option>" : '<option value="">Selecione</option>') +
+      regioes().map(function (x) { return "<option" + (x === atual ? " selected" : "") + ">" + esc(x) + "</option>"; }).join("");
+  }
+  function tagRegiao(x) {
+    return regiaoVista() ? "" : ' <span class="regiao-tag">' + esc(x.regiao || "sem região") + "</span>";
+  }
+  function desenharQuem() {
+    var q = bruto.quem || { nome: "", regiao: "", todas: true, geral: true };
+    $("quem").innerHTML = "Entrou como <strong>" + esc(q.geral ? (autor() || "senha geral") : q.nome) + "</strong> · " +
+      (q.regiao ? "região <strong>" + esc(q.regiao) + "</strong>" : "acesso a <strong>todas as regiões</strong>");
+    $("autor-campo").hidden = !q.geral;
+    $("regiao-sel").innerHTML = opcoesRegiao(regiaoVista(), "Todas as regiões");
+    $("regiao-sel").value = regiaoVista();
+    $("regiao-sel").disabled = !!q.regiao;
+    $("instrutores-caixa").hidden = !q.todas;
+    $("senha-caixa").hidden = !q.geral;
+    $("atualizar-banco").hidden = !q.todas;
+    if (q.todas) desenharInstrutores();
+  }
+  // Instrutores e códigos (só para quem cuida de todas as regiões).
+  function desenharInstrutores() {
+    var lista = bruto.instrutores || [];
+    $("instrutores").innerHTML = lista.length ? lista.map(function (x) {
+      return "<li" + (x.ativo ? "" : ' class="inativo"') + "><strong>" + esc(x.nome) + '</strong><span class="regiao-tag">' +
+        esc(x.regiao || "Todas as regiões") + "</span><code>" + esc(x.codigo) + "</code>" + (x.ativo ? "" : '<span class="cinza">desativado</span>') +
+        '<button type="button" class="btn-sec" data-instrutor="' + (x.ativo ? "desativar" : "ativar") + '" data-linha="' + x.linha +
+        '" data-antes="' + esc(x.nome) + '">' + (x.ativo ? "Desativar" : "Reativar") + "</button></li>";
+    }).join("") : '<li class="cinza">Nenhum instrutor cadastrado ainda. Até lá, só a senha geral entra no painel.</li>';
+    if (!$("instrutor-regiao").options.length) $("instrutor-regiao").innerHTML = opcoesRegiao("", "Todas as regiões (comando)");
+  }
+
   function desenhar() {
     if (!dados.provas) return; // dados guardados de uma versão antiga do painel: espera os novos
+    if (bruto.quem) desenharQuem();
     desenharSeletorProva();
     var res = provas();
     var tentativas = {};
@@ -179,7 +237,7 @@
     var sel = $("presenca-aplicacao");
     var escolhida = sel.value;
     sel.innerHTML = lista.map(function (j) {
-      return '<option value="' + j.linha + "|" + j.inicio + '">' + esc(nomeDaProva(j.prova) + " · " + quando(j.inicio) + (j.ids && j.ids.length ? " · " + j.ids.length + " convocado(s)" : "")) + "</option>";
+      return '<option value="' + j.linha + "|" + j.inicio + '">' + esc(nomeDaProva(j.prova) + " · " + quando(j.inicio) + (j.regiao ? " · " + j.regiao : "") + (j.ids && j.ids.length ? " · " + j.ids.length + " convocado(s)" : "")) + "</option>";
     }).join("");
     if (escolhida && [].some.call(sel.options, function (o) { return o.value === escolhida; })) sel.value = escolhida;
     var j = lista.filter(function (x) { return x.linha + "|" + x.inicio === sel.value; })[0] || lista[0];
@@ -190,9 +248,10 @@
     }
     // Chamados: os IDs liberados ou, sem lista, as patentes da prova. Aplicações antigas eram abertas a todo o Efetivo.
     var patentesProva = provaPorId(j.prova).patentes || [];
+    var daRegiao = j.regiao ? efetivo.filter(function (o) { return o.regiao === j.regiao; }) : efetivo;
     var chamados = j.ids && j.ids.length
       ? j.ids.map(function (id) { return efetivo.filter(function (o) { return chave(o.id) === id; })[0] || { nome: "(fora do Efetivo)", id: id, patente: "" }; })
-      : j.inicio < INICIO_POR_PATENTE ? efetivo : efetivo.filter(function (o) { return patentesProva.indexOf(o.patente) >= 0; });
+      : j.inicio < INICIO_POR_PATENTE ? daRegiao : daRegiao.filter(function (o) { return patentesProva.indexOf(o.patente) >= 0; });
     var ocultar = $("ocultar-testes").checked;
     var envios = dados.resultados.filter(function (r) {
       return r.prova === j.prova && r.quando >= j.inicio && r.quando <= j.fim + 15 * 6e4 && (!ocultar || !ehTeste(r));
@@ -221,7 +280,7 @@
     $("n-faltosos").classList.toggle("alerta", ultima && faltou.length > 0);
     $("presenca-ajuda").innerHTML = "<strong>" + esc(provaPorId(j.prova).nome) + "</strong>, " + quando(j.inicio) + " até " + quando(j.fim) + ". " +
       (j.ids && j.ids.length ? "Aplicação só para <strong>" + j.ids.length + "</strong> convocado(s)." :
-        (j.inicio < INICIO_POR_PATENTE ? "Aberta a todos" : "Aberta às patentes da prova") + ": conferida contra o Efetivo, com <strong>" + chamados.length + "</strong> oficiais.") +
+        (j.inicio < INICIO_POR_PATENTE ? "Aberta a todos" : "Aberta às patentes da prova") + (j.regiao ? " de " + esc(j.regiao) : "") + ": conferida contra o Efetivo, com <strong>" + chamados.length + "</strong> oficiais.") +
       (!efetivo.length && !(j.ids && j.ids.length) ? " O Efetivo está vazio; ele se preenche sozinho com quem envia prova ou justificativa, e você completa na aba Efetivo." : "");
     function nome(o) { return esc((o.patente ? o.patente + " " : "") + o.nome) + (o.id ? ' <span class="cinza">· ID ' + esc(o.id) + "</span>" : ""); }
     function grupo(titulo, classe, itens, linha, botao) {
@@ -244,47 +303,81 @@
       faltou.map(function (x) { return "• " + (x.o.patente ? x.o.patente + " " : "") + x.o.nome + (x.o.id ? " (ID " + x.o.id + ")" : ""); }).join("\n");
   }
 
-  // ---------- Efetivo: relação de oficiais, com a situação em cada prova ----------
+  // ---------- Efetivo: a tela central, uma linha por oficial com a situação na prova da patente ----------
+  function provaDaPatente(patente) {
+    return dados.provas.filter(function (x) { return (x.patentes || []).map(chave).indexOf(chave(patente)) >= 0; })[0] || null;
+  }
+  // ID provisório: qualquer coisa que não seja só número (ex.: "Nº 21", usado enquanto falta o ID fixo).
+  function idProvisorio(o) { return !/^\d+$/.test(String(o.id || "").trim()); }
+  function situacaoNaProva(o, porProva) {
+    var prova = provaDaPatente(o.patente);
+    if (!prova) return { tipo: "sem-prova", html: '<span class="cinza">Sem prova na patente</span>' };
+    var r = porProva[prova.id][chave(o.id)] || null, av = avaliacaoDe(o, prova.id);
+    var extra = (av ? '<span class="situacao-final">' + esc(av.situacao) + "</span>" : "") + ' <span class="cinza">' + esc(prova.curto) + "</span>";
+    if (r) return { tipo: r.aprovado ? "aprovado" : "reprovado",
+      html: '<span class="stamp ' + (r.aprovado ? "ok" : "") + '">' + (r.aprovado ? "APROVADO" : "REPROVADO") + " " + r.nota + "%</span>" + extra };
+    var aus = (dados.ausencias || []).filter(function (a) { return o.id && chave(a.id) === chave(o.id); })[0];
+    return { tipo: "pendente", html: '<span class="stamp pendente">PENDENTE</span>' +
+      (aus ? ' <span class="cinza">ausência ' + esc(aus.situacao.toLowerCase()) + "</span>" : "") + extra };
+  }
   function desenharEfetivo() {
     var efetivo = dados.efetivo || [];
-    var busca = chave($("efetivo-busca").value), pat = $("efetivo-patente").value;
+    var busca = chave($("efetivo-busca").value), pat = $("efetivo-patente").value, sit = $("efetivo-situacao").value;
     var opcoes = '<option value="">Todas as patentes</option>' + window.PROVA.patentes.map(function (x) { return "<option>" + esc(x) + "</option>"; }).join("");
     if ($("efetivo-patente").innerHTML !== opcoes) { $("efetivo-patente").innerHTML = opcoes; $("efetivo-patente").value = pat; }
     if (!$("efetivo-nova-patente").options.length) $("efetivo-nova-patente").innerHTML = opcoesPatente("");
+    if ($("efetivo-nova-regiao").dataset.vista !== regiaoVista()) {
+      $("efetivo-nova-regiao").innerHTML = opcoesRegiao(regiaoVista());
+      $("efetivo-nova-regiao").value = (bruto.quem && bruto.quem.regiao) || regiaoVista();
+      $("efetivo-nova-regiao").dataset.vista = regiaoVista();
+    }
     $("n-efetivo").textContent = efetivo.length || "";
-    $("efetivo-ajuda").innerHTML = "<strong>" + efetivo.length + "</strong> oficiais na aba Efetivo da planilha." +
-      (dados.efetivoIncluidos ? " <strong>" + dados.efetivoIncluidos + "</strong> entraram agora, a partir das provas e ausências enviadas." : "") +
-      " Quem envia prova ou justificativa entra sozinho; inclua aqui quem nunca enviou nada e corrija o que vier errado.";
     var ocultar = $("ocultar-testes").checked;
-    var porProva = dados.provas.map(function (x) {
-      return melhores(dados.resultados.filter(function (r) { return r.prova === x.id && (!ocultar || !ehTeste(r)); }));
+    var porProva = {};
+    dados.provas.forEach(function (x) {
+      porProva[x.id] = melhores(dados.resultados.filter(function (r) { return r.prova === x.id && (!ocultar || !ehTeste(r)); }));
     });
-    $("efetivo-cabecalho").innerHTML = "<th>Oficial</th><th>ID</th><th>Patente</th>" +
-      dados.provas.map(function (x) { return "<th>" + esc(x.curto) + "</th>"; }).join("") + "<th>Observação</th><th></th>";
+    var situacoes = {}, contagem = {};
+    efetivo.forEach(function (o) {
+      var s = situacaoNaProva(o, porProva);
+      situacoes[o.linha] = s;
+      contagem[s.tipo] = (contagem[s.tipo] || 0) + 1;
+    });
+    var provisorios = efetivo.filter(idProvisorio).length, semRegiao = efetivo.filter(function (o) { return !o.regiao; }).length;
+    $("efetivo-ajuda").innerHTML = "<strong>" + efetivo.length + "</strong> " + (efetivo.length === 1 ? "oficial" : "oficiais") +
+      (regiaoVista() ? " em " + esc(regiaoVista()) : " em todas as regiões") + ": " +
+      [["pendente", "com a prova pendente"], ["aprovado", "aprovado", "aprovados"], ["reprovado", "reprovado", "reprovados"], ["sem-prova", "em patente sem prova"]]
+        .filter(function (x) { return contagem[x[0]]; })
+        .map(function (x) { return "<strong>" + contagem[x[0]] + "</strong> " + (contagem[x[0]] > 1 && x[2] ? x[2] : x[1]); }).join(", ") + "." +
+      (provisorios ? ' <span class="selo-alerta">' + provisorios + " com ID provisório</span>" : "") +
+      (semRegiao ? ' <span class="selo-alerta">' + semRegiao + " sem região</span>" : "") +
+      (dados.efetivoIncluidos ? " <strong>" + dados.efetivoIncluidos + "</strong> entraram agora, a partir das provas e ausências enviadas." : "") +
+      " Clique no nome para ver o histórico e o padrinho.";
+    $("efetivo-cabecalho").innerHTML = "<th>Oficial</th><th>ID</th><th>Patente</th><th>Região</th><th>Prova da patente</th><th>Observação</th><th></th>";
     var lista = efetivo.filter(function (o) {
-      return (!pat || o.patente === pat) && (!busca || chave(o.nome + " " + o.id + " " + o.patente).indexOf(busca) >= 0);
+      if (pat && o.patente !== pat) return false;
+      if (sit === "provisorio" ? !idProvisorio(o) : sit === "sem-regiao" ? !!o.regiao : sit && situacoes[o.linha].tipo !== sit) return false;
+      return !busca || chave(o.nome + " " + o.id + " " + o.patente + " " + o.regiao).indexOf(busca) >= 0;
     }).sort(function (a, b) { return ordemPatente(a.patente) - ordemPatente(b.patente) || a.nome.localeCompare(b.nome, "pt-BR"); });
-    var colunas = 5 + dados.provas.length;
+    var colunas = 7;
     $("efetivo").innerHTML = lista.length ? lista.map(function (o) {
       if (editandoEfetivo === o.linha) {
         return '<tr class="editando"><td colspan="' + colunas + '"><form class="efetivo-form" data-linha="' + o.linha + '" data-antes="' + esc(o.nome) + '">' +
           '<label>Nome<input name="nome" maxlength="80" value="' + esc(o.nome) + '" required></label>' +
           '<label>ID fixo<input name="id" maxlength="30" value="' + esc(o.id) + '" required></label>' +
           '<label>Patente<select name="patente" required>' + opcoesPatente(o.patente) + '</select></label>' +
+          '<label>Região<select name="regiao" required>' + opcoesRegiao(o.regiao) + '</select></label>' +
           '<label class="largo">Observação<input name="obs" maxlength="200" value="' + esc(o.obs) + '"></label>' +
           '<span class="corrigir-botoes"><button type="submit" class="btn-sec">Salvar</button>' +
           '<button type="button" class="btn-sec" data-efetivo-cancelar>Cancelar</button>' +
           '<button type="button" class="btn-sec perigo" data-efetivo-remover>Retirar do Efetivo</button></span></form></td></tr>';
       }
-      var celulas = dados.provas.map(function (x, i) {
-        var r = porProva[i][chave(o.id)] || null, av = avaliacaoDe(o, x.id);
-        if (!r && !av) return '<td class="cinza">—</td>';
-        return "<td>" + (r ? '<span class="stamp ' + (r.aprovado ? "ok" : "") + '">' + r.nota + "%</span>" : "") +
-          (av ? '<span class="situacao-final">' + esc(av.situacao) + "</span>" : "") + "</td>";
-      }).join("");
-      var linha = '<tr class="oficial' + (abertoEfetivo === o.linha ? " aberto" : "") + '" data-efetivo-abrir="' + o.linha + '" tabindex="0"><td><strong>' + esc(o.nome) + "</strong></td><td>" + esc(o.id) + "</td><td>" + esc(o.patente) + "</td>" + celulas +
+      var linha = '<tr class="oficial' + (abertoEfetivo === o.linha ? " aberto" : "") + '" data-efetivo-abrir="' + o.linha + '" tabindex="0"><td><strong>' + esc(o.nome) + "</strong></td>" +
+        "<td>" + esc(o.id) + (idProvisorio(o) ? '<span class="selo-provisorio" title="Troque pelo ID fixo do oficial">provisório</span>' : "") + "</td>" +
+        "<td>" + esc(o.patente) + "</td><td>" + (o.regiao ? esc(o.regiao) : '<span class="selo-alerta">sem região</span>') + "</td>" +
+        "<td>" + situacoes[o.linha].html + "</td>" +
         '<td class="cinza">' + esc(o.obs) + '</td><td><button type="button" class="btn-sec" data-efetivo-editar="' + o.linha + '">Editar</button></td></tr>';
-      if (abertoEfetivo === o.linha) linha += '<tr class="ficha-oficial"><td colspan="' + colunas + '">' + blocoPadrinho(o) + "</td></tr>";
+      if (abertoEfetivo === o.linha) linha += '<tr class="ficha-oficial"><td colspan="' + colunas + '">' + blocoPadrinho(o) + historico(o) + "</td></tr>";
       return linha;
     }).join("") : '<tr><td colspan="' + colunas + '" class="cinza">Ninguém neste filtro.</td></tr>';
   }
@@ -333,12 +426,21 @@
   function desenharAplicacoes() {
     var opcoes = dados.provas.map(function (x) { return '<option value="' + esc(x.id) + '">' + esc(x.nome) + "</option>"; }).join("");
     if ($("ag-prova").innerHTML !== opcoes) { $("ag-prova").innerHTML = opcoes; $("ag-prova").value = provaAtual().id; }
+    // A região da nova aplicação acompanha a região vista no topo (o instrutor ainda pode trocar).
+    if (!editandoAplicacao && $("ag-regiao").dataset.vista !== regiaoVista()) {
+      $("ag-regiao").innerHTML = opcoesRegiao(regiaoVista(), "Todas as regiões");
+      $("ag-regiao").value = (bruto.quem && bruto.quem.regiao) || regiaoVista();
+      $("ag-regiao").dataset.vista = regiaoVista();
+    }
     if (!$("ag-inicio").value) {
       var d = new Date(); d.setDate(d.getDate() + 1); d.setHours(20, 0, 0, 0);
       $("ag-inicio").value = iso(d); $("ag-fim").value = iso(new Date(d.getTime() + 36e5));
     }
     var patentes = {};
-    (dados.efetivo || []).forEach(function (o) { if (o.patente && o.id) (patentes[o.patente] = patentes[o.patente] || []).push(o.id); });
+    var regiaoAg = $("ag-regiao").value;
+    (dados.efetivo || []).forEach(function (o) {
+      if (o.patente && o.id && (!regiaoAg || o.regiao === regiaoAg)) (patentes[o.patente] = patentes[o.patente] || []).push(o.id);
+    });
     $("ag-patentes").innerHTML = Object.keys(patentes).sort(function (a, b) { return a.localeCompare(b, "pt-BR"); }).map(function (k) {
       var alvo = (provaPorId($("ag-prova").value).patentes || []).indexOf(k) >= 0;
       return '<button type="button" class="chip' + (alvo ? " alvo" : "") + '" data-patente="' + esc(k) + '"' +
@@ -351,7 +453,8 @@
     $("banco-info").textContent = dados.provas.map(function (x) { return x.curto + ": " + x.questoes + " questões"; }).join(" · ");
     $("aplicacoes").innerHTML = lista.length ? lista.map(function (j) {
       var estado = j.fim <= agora ? "encerrada" : j.inicio <= agora ? "aberta" : "marcada";
-      return '<li class="aplicacao ' + estado + '"><div><strong>' + esc(provaPorId(j.prova).nome) + "</strong> · " + quando(j.inicio) + " até " + quando(j.fim) +
+      return '<li class="aplicacao ' + estado + '"><div><strong>' + esc(provaPorId(j.prova).nome) + "</strong>" +
+        ' <span class="regiao-tag">' + esc(j.regiao || "todas as regiões") + "</span> · " + quando(j.inicio) + " até " + quando(j.fim) +
         ' <span class="stamp ' + (estado === "aberta" ? "ok" : estado === "marcada" ? "pendente" : "") + '">' + estado.toUpperCase() + "</span>" +
         '<p class="cinza">' + (j.ids && j.ids.length ? "Só " + j.ids.length + " convocado(s): " + esc(j.ids.map(nomeDoId).join(", ")) : "Patentes da prova: " + esc((provaPorId(j.prova).patentes || []).join(", "))) +
         (j.obs ? " · " + esc(j.obs) : "") + "</p></div>" +
@@ -415,7 +518,7 @@
   function desenharRegistro() {
     var lista = dados.registro || [];
     $("registro").innerHTML = lista.length ? lista.map(function (x) {
-      return '<li><span class="cinza">' + quando(x.quando) + "</span> · <strong>" + esc(x.autor) + "</strong> · " + esc(x.acao) +
+      return '<li><span class="cinza">' + quando(x.quando) + "</span> · <strong>" + esc(x.autor) + "</strong>" + (x.regiao && !regiaoVista() ? ' <span class="regiao-tag">' + esc(x.regiao) + "</span>" : "") + " · " + esc(x.acao) +
         (x.detalhe ? ' <span class="cinza">— ' + esc(x.detalhe) + "</span>" : "") + "</li>";
     }).join("") : '<li class="cinza">Nenhuma ação registrada ainda.</li>';
   }
@@ -589,7 +692,7 @@
       }).join(o.t.length > 1 ? '<span class="seta" aria-hidden="true">→</span>' : "");
       var av = avaliacaoDe(o.melhor);
       var linha = '<tr class="oficial' + (aberto === k ? " aberto" : "") + '" data-chave="' + esc(k) + '" tabindex="0">' +
-        "<td><strong>" + esc(o.nome) + "</strong></td><td>" + esc(o.id) + "</td><td>" + esc(o.patente) + "</td>" +
+        "<td><strong>" + esc(o.nome) + "</strong>" + tagRegiao(o.ultima) + "</td><td>" + esc(o.id) + "</td><td>" + esc(o.patente) + "</td>" +
         "<td>" + quando(o.quando) + '</td><td class="tentativas">' + chips + '</td><td class="cost">' + o.nota + "%</td>" +
         "<td>" + seloSituacao(o.melhor) + (av ? '<span class="situacao-final">' + esc(av.situacao) + "</span>" : "") + "</td></tr>";
       if (aberto === k) linha += '<tr class="ficha-oficial"><td colspan="7">' + ficha(o.ultima) + "</td></tr>";
@@ -630,7 +733,7 @@
       var k = r.id + "|" + r.quando;
       var n = tentativas[idOficial(r)];
       var linha = '<tr class="oficial' + (aberto === k ? " aberto" : "") + '" data-chave="' + esc(k) + '" tabindex="0">' +
-        "<td><strong>" + esc(r.nome) + "</strong>" + (n > 1 ? ' <span class="selo-alerta">' + n + " tentativas</span>" : "") + "</td>" +
+        "<td><strong>" + esc(r.nome) + "</strong>" + tagRegiao(r) + (n > 1 ? ' <span class="selo-alerta">' + n + " tentativas</span>" : "") + "</td>" +
         "<td>" + esc(r.id) + "</td><td>" + esc(r.patente) + "</td>" +
         "<td>" + quando(r.quando) + '</td><td class="cost">' + r.acertos + "/" + r.recebidas + '</td><td class="cost">' + r.nota + "%</td>" +
         '<td><span class="stamp ' + (r.aprovado ? "ok" : "") + '">' + (r.aprovado ? "APROVADO" : "REPROVADO") + "</span>" +
@@ -658,7 +761,7 @@
         return "<strong>" + r.nota + "%</strong> (" + (r.aprovado ? "aprovado" : "reprovado") + ") em " + quando(r.quando);
       }).join(" · ") + ". Este pedido provavelmente não é mais necessário.</p>" : "";
       return '<li class="ausencia' + (fez.length ? " duplicada" : "") + '">' +
-        '<div class="ausencia-topo"><strong>' + esc(a.patente + " " + a.nome) + "</strong> · ID " + esc(a.id) +
+        '<div class="ausencia-topo"><strong>' + esc(a.patente + " " + a.nome) + "</strong>" + tagRegiao(a) + " · ID " + esc(a.id) +
         (a.discord ? " · Discord " + esc(a.discord) : "") +
         '<span class="stamp ' + classe + '">' + esc(a.situacao.toUpperCase()) + "</span></div>" +
         '<p class="ausencia-meta">' + esc(a.aplicacao) + " · " + esc(a.motivo) + " · enviado em " + quando(a.quando) + "</p>" +
@@ -832,7 +935,8 @@
     if (!ids) { carga("Informe pelo menos um ID."); return; }
     if (!window.confirm("Agendar a recuperação da " + provaAtual().nome + " de " + quando(ini) + " até " + quando(fim) + " para os IDs: " + ids + "?")) return;
     $("rec-ids").dataset.editado = "";
-    carregar(lerSenha(), false, undefined, "&recuperacao=1&prova=" + encodeURIComponent(provaAtual().id) + "&inicio=" + ini + "&fim=" + fim + "&ids=" + encodeURIComponent(ids));
+    carregar(lerSenha(), false, undefined, "&recuperacao=1&prova=" + encodeURIComponent(provaAtual().id) + "&inicio=" + ini + "&fim=" + fim +
+      "&ids=" + encodeURIComponent(ids) + "&regiao=" + encodeURIComponent(regiaoVista()));
   });
   $("rec-copiar-padrinhos").addEventListener("click", function () {
     var pares = padrinhos(provas());
@@ -865,6 +969,31 @@
       "&prova=" + encodeURIComponent(f.getAttribute("data-prova")));
   });
 
+  // ---------- Região vista e instrutores ----------
+  $("regiao-sel").addEventListener("change", function () {
+    try { sessionStorage.setItem(CHAVE_REGIAO, this.value); } catch (e) {}
+    aberto = null; abertoEfetivo = null;
+    $("rec-ids").dataset.editado = "";
+    dados = recortar();
+    desenhar();
+  });
+  $("instrutores").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-instrutor]");
+    if (!b) return;
+    var tipo = b.getAttribute("data-instrutor");
+    if (tipo === "desativar" && !window.confirm("Desativar o código de " + b.getAttribute("data-antes") + "? Ele não entra mais no painel.")) return;
+    b.disabled = true;
+    carregar(lerSenha(), false, undefined, "&instrutor=" + tipo + "&linha=" + b.getAttribute("data-linha") + "&antes=" + encodeURIComponent(b.getAttribute("data-antes")));
+  });
+  $("instrutor-novo").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var f = this, nome = f.elements.nome.value.trim(), regiao = f.elements.regiao.value;
+    if (!nome) return;
+    if (!window.confirm("Cadastrar " + nome + " com acesso a " + (regiao || "todas as regiões") + "? O código aparece na lista logo depois.")) return;
+    carregar(lerSenha(), false, undefined, "&instrutor=novo&nome=" + encodeURIComponent(nome) + "&regiao=" + encodeURIComponent(regiao))
+      .then(function () { if (dados && /Código de/.test(dados.aviso || "")) f.reset(); });
+  });
+
   // ---------- Prova escolhida, Efetivo, Agenda e Presença ----------
   $("prova-sel").addEventListener("change", function () {
     try { sessionStorage.setItem(CHAVE_PROVA, this.value); } catch (e) {}
@@ -872,12 +1001,12 @@
     $("rec-ids").dataset.editado = "";
     desenhar();
   });
-  ["efetivo-busca", "efetivo-patente", "presenca-aplicacao"].forEach(function (id) {
+  ["efetivo-busca", "efetivo-patente", "efetivo-situacao", "presenca-aplicacao"].forEach(function (id) {
     $(id).addEventListener(id === "efetivo-busca" ? "input" : "change", function () { if (dados) desenhar(); });
   });
   function enviarEfetivo(f, tipo) {
     var v = function (n) { return encodeURIComponent(f.elements[n] ? f.elements[n].value.trim() : ""); };
-    return "&efetivo=" + tipo + "&nome=" + v("nome") + "&id=" + v("id") + "&patente=" + v("patente") + "&obs=" + v("obs");
+    return "&efetivo=" + tipo + "&nome=" + v("nome") + "&id=" + v("id") + "&patente=" + v("patente") + "&regiao=" + v("regiao") + "&obs=" + v("obs");
   }
   $("efetivo-novo").addEventListener("submit", function (ev) {
     ev.preventDefault();
@@ -934,31 +1063,34 @@
   });
   $("copiar-efetivo").addEventListener("click", function () {
     var lista = (dados.efetivo || []).slice().sort(function (a, b) { return (a.patente + a.nome).localeCompare(b.patente + b.nome, "pt-BR"); });
-    copiar("📜 **Efetivo da Cavalaria (" + lista.length + ")**\n\n" + lista.map(function (o) {
-      return "• " + (o.patente ? o.patente + " " : "") + o.nome + (o.id ? " (ID " + o.id + ")" : "");
+    copiar("📜 **Efetivo da Cavalaria" + (regiaoVista() ? " · " + regiaoVista() : "") + " (" + lista.length + ")**\n\n" + lista.map(function (o) {
+      return "• " + (o.patente ? o.patente + " " : "") + o.nome + (o.id ? " (ID " + o.id + ")" : "") + (!regiaoVista() && o.regiao ? " · " + o.regiao : "");
     }).join("\n"), this, "Copiar lista");
   });
   $("ag-prova").addEventListener("change", function () { if (dados) desenharAplicacoes(); });
+  $("ag-regiao").addEventListener("change", function () { if (dados) desenharAplicacoes(); });
   $("ag-patentes").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-patente]");
     if (!b) return;
     var atuais = $("ag-ids").value.split(/[,;\s]+/).filter(String);
+    var regiaoAg = $("ag-regiao").value;
     (dados.efetivo || []).forEach(function (o) {
-      if (o.patente === b.getAttribute("data-patente") && o.id && atuais.indexOf(o.id) < 0) atuais.push(o.id);
+      if (o.patente === b.getAttribute("data-patente") && o.id && (!regiaoAg || o.regiao === regiaoAg) && atuais.indexOf(o.id) < 0) atuais.push(o.id);
     });
     $("ag-ids").value = atuais.join(", ");
     b.classList.add("usado");
   });
   $("ag-agendar").addEventListener("click", function () {
     var ini = new Date($("ag-inicio").value).getTime(), fim = new Date($("ag-fim").value).getTime();
-    var ids = $("ag-ids").value.trim(), prova = provaPorId($("ag-prova").value);
+    var ids = $("ag-ids").value.trim(), prova = provaPorId($("ag-prova").value), regiaoAg = $("ag-regiao").value;
     if (!ini || !fim || fim <= ini) { carga("Confira o horário de início e fim."); return; }
     var n = ids ? ids.split(/[,;\s]+/).filter(String).length : 0;
     var editando = editandoAplicacao;
-    if (!window.confirm((editando ? "Salvar a aplicação como " : "Agendar a ") + prova.nome + " de " + quando(ini) + " até " + quando(fim) + (n ? ", só para " + n + " oficial(is)?" : ", aberta às patentes " + (prova.patentes || []).join(", ") + "?"))) return;
+    if (!window.confirm((editando ? "Salvar a aplicação como " : "Agendar a ") + prova.nome + " de " + quando(ini) + " até " + quando(fim) +
+      " (" + (regiaoAg || "todas as regiões") + ")" + (n ? ", só para " + n + " oficial(is)?" : ", aberta às patentes " + (prova.patentes || []).join(", ") + "?"))) return;
     var acao = editando ? "&editar_aplicacao=" + editando.linha + "&inicio_antes=" + editando.inicio : "&agendar=1";
     carregar(lerSenha(), false, undefined, acao + "&prova=" + encodeURIComponent(prova.id) + "&inicio=" + ini + "&fim=" + fim +
-      "&ids=" + encodeURIComponent(ids) + "&obs=" + encodeURIComponent($("ag-obs").value.trim())).then(function () {
+      "&ids=" + encodeURIComponent(ids) + "&regiao=" + encodeURIComponent(regiaoAg) + "&obs=" + encodeURIComponent($("ag-obs").value.trim())).then(function () {
       if (dados && /agendada|alterada/.test(dados.aviso || "")) {
         sairDaEdicao();
         $("ag-ids").value = ""; $("ag-obs").value = "";
@@ -1011,6 +1143,7 @@
   });
   function sairDaEdicao() {
     editandoAplicacao = null;
+    delete $("ag-regiao").dataset.vista;
     $("ag-agendar").textContent = "Agendar aplicação";
     $("ag-cancelar-edicao").hidden = true;
     $("nova-aplicacao").querySelector("summary").textContent = "Nova aplicação";
@@ -1027,6 +1160,8 @@
       if (!j) return;
       editandoAplicacao = { linha: linha, inicio: ini };
       $("ag-prova").value = j.prova;
+      $("ag-regiao").innerHTML = opcoesRegiao(j.regiao, "Todas as regiões");
+      $("ag-regiao").value = (bruto.quem && bruto.quem.regiao) || j.regiao || "";
       $("ag-inicio").value = iso(new Date(j.inicio));
       $("ag-fim").value = iso(new Date(j.fim));
       $("ag-ids").value = (j.ids || []).join(", ");
@@ -1049,7 +1184,8 @@
 
   // Já entrou antes: mostra na hora os últimos dados guardados e atualiza por trás.
   if (lerSenha()) {
-    try { dados = JSON.parse(ler(CHAVE_DADOS) || "null"); } catch (e) { dados = null; }
+    try { bruto = JSON.parse(ler(CHAVE_DADOS) || "null"); } catch (e) { bruto = null; }
+    dados = bruto && recortar();
     if (dados) {
       $("entrar").hidden = true;
       $("painel").hidden = false;

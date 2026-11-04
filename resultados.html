@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aprovados · Cavalaria SD</title>
+<title>Aprovados · Cavalaria</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=provas3">
+<link rel="stylesheet" href="css/style.css?v=regioes1">
 </head>
 <body data-page="avaliacao">
 <div class="sheet">
@@ -17,7 +17,7 @@
     <span class="kicker">Edição Extra</span>
     <h2>Quadro de Honra</h2>
     <p class="hero-sub">Aprovados nas provas da Cavalaria</p>
-    <p class="lead">A Cavalaria de Saint Denis tem a honra de anunciar os oficiais aprovados na avaliação dos cursos.</p>
+    <p class="lead">A Cavalaria tem a honra de anunciar os oficiais aprovados na avaliação dos cursos.</p>
     <span data-ornament></span>
   </section>
 
@@ -34,8 +34,8 @@
 
 </main>
 </div>
-<script src="js/layout.js"></script>
-<script src="js/prova-data.js?v=provas1"></script>
+<script src="js/prova-data.js?v=regioes1"></script>
+<script src="js/layout.js?v=regioes1"></script>
 <script>
   (function () {
     function esc(t) { var d = document.createElement("div"); d.textContent = t == null ? "" : t; return d.innerHTML; }
@@ -49,15 +49,20 @@
         }
         document.getElementById("aviso").hidden = true;
         document.getElementById("quadro").hidden = false;
-        // Um quadro por prova divulgada.
-        document.getElementById("quadros").innerHTML = (r.provas || []).map(function (p) {
-          var n = p.aprovados.length;
+        // Um quadro por prova divulgada, só da região escolhida no topo (ou de todas).
+        var regiao = window.Cavalaria && window.Cavalaria.regiao;
+        document.getElementById("quadros").innerHTML = '<p class="cinza">' + (regiao
+          ? "Aprovados de <strong>" + esc(regiao) + "</strong>. Para ver todas as regiões, escolha \"Todas\" no topo da página."
+          : "Aprovados de todas as regiões. Escolha a sua no topo da página para filtrar.") + "</p>" +
+          (r.provas || []).map(function (p) {
+          var lista = p.aprovados.filter(function (a) { return !regiao || a.regiao === regiao; });
+          var n = lista.length;
           return '<h3 class="section">' + esc(p.nome) + '</h3>' +
             '<p class="quadro-total">' + (n ? "<strong>" + n + "</strong> oficia" + (n === 1 ? "l aprovado" : "is aprovados") : "Nenhum oficial aprovado até o momento.") + "</p>" +
-            '<ol class="honra">' + p.aprovados.map(function (a) {
+            '<ol class="honra">' + lista.map(function (a) {
               return '<li class="honra-item"><span class="honra-estrela" aria-hidden="true">★</span>' +
                 '<span class="honra-nome">' + esc(a.nome) + '</span>' +
-                '<span class="honra-patente">' + esc(a.patente) + '</span>' +
+                '<span class="honra-patente">' + esc(a.patente) + (!regiao && a.regiao ? " · " + esc(a.regiao) : "") + '</span>' +
                 '<span class="stamp ok">APROVADO</span></li>';
             }).join("") + "</ol>";
         }).join("");

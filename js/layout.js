@@ -1,16 +1,36 @@
 // Cabeçalho, navegação e rodapé compartilhados por todas as páginas.
 (function () {
-  var PAGES = [
+  // Menu agrupado: links soltos e grupos que abrem uma lista.
+  var MENU = [
     { id: "inicio", href: "index.html", label: "Início" },
-    { id: "cursos", href: "cursos.html", label: "Grade de Cursos" },
-    { id: "conduta", href: "conduta.html", label: "Conduta" },
-    { id: "prancheta", href: "prancheta.html", label: "Prancheta" },
-    { id: "patrulha", href: "patrulha.html", label: "Patrulha & Abordagem" },
-    { id: "lideranca", href: "lideranca.html", label: "Liderança" },
-    { id: "negociacao", href: "negociacao.html", label: "Negociação" },
+    { label: "Material", itens: [
+      { id: "cursos", href: "cursos.html", label: "Grade de Cursos" },
+      { id: "conduta", href: "conduta.html", label: "Código de Conduta" },
+      { id: "prancheta", href: "prancheta.html", label: "Prancheta" },
+      { id: "patrulha", href: "patrulha.html", label: "Patrulha & Abordagem" },
+      { id: "lideranca", href: "lideranca.html", label: "Liderança" },
+      { id: "negociacao", href: "negociacao.html", label: "Negociação" }
+    ] },
     { id: "consulta", href: "consulta.html", label: "Consulta" },
-    { id: "avaliacao", href: "avaliacao.html", label: "Prova" }
+    { label: "Provas", itens: [
+      { id: "avaliacao", href: "avaliacao.html", label: "Provas e agenda" },
+      { id: "simulado", href: "simulado.html", label: "Simulado de treino" },
+      { id: "resultados", href: "resultados.html", label: "Quadro de Honra" },
+      { id: "ausencia", href: "ausencia.html", label: "Justificar ausência" }
+    ] },
+    { id: "situacao", href: "situacao.html", label: "Minha situação" }
   ];
+
+  // Região de quem está lendo (escolhida no topo ou em "Minha situação"); muda o nome no cabeçalho.
+  var CHAVE_REGIAO = "cavalaria-regiao";
+  var REGIOES = (window.PROVA && window.PROVA.regioes) || ["Lemoyne", "New Hanover", "West Elizabeth", "Ambarino", "New Austin"];
+  var SIGLAS = { "Lemoyne": "LM", "New Hanover": "NH", "West Elizabeth": "WE", "Ambarino": "AM", "New Austin": "NA" };
+  function regiaoAtual() {
+    var r = "";
+    try { r = localStorage.getItem(CHAVE_REGIAO) || ""; } catch (e) {}
+    return REGIOES.indexOf(r) >= 0 ? r : "";
+  }
+  var regiao = regiaoAtual();
 
   var BADGE =
     '<svg class="badge" viewBox="0 0 100 100" aria-hidden="true">' +
@@ -21,7 +41,7 @@
     tips(50, 50, 46, 6) +
     '<circle cx="50" cy="50" r="19" fill="#7a5420" opacity=".25"/>' +
     '<circle cx="50" cy="50" r="17" fill="none" stroke="#3a2610" stroke-width="1.2"/>' +
-    '<text x="50" y="57" text-anchor="middle" font-family="Caladea, serif" font-weight="700" font-size="18" fill="#2b1d12">SD</text>' +
+    '<text x="50" y="57" text-anchor="middle" font-family="Caladea, serif" font-weight="700" font-size="18" fill="#2b1d12">' + (SIGLAS[regiao] || "C") + "</text>" +
     '</svg>';
 
   function star(cx, cy, R, r, n) {
@@ -57,16 +77,27 @@
   // Páginas isoladas (como a prova) não mostram o menu nem levam ao restante do site.
   var isolada = document.body.hasAttribute("data-isolada");
 
-  var nav = PAGES.map(function (p) {
+  function link(p) {
     return '<a href="' + p.href + '"' + (p.id === current ? ' aria-current="page"' : "") + ">" + p.label + "</a>";
+  }
+  var nav = MENU.map(function (g) {
+    if (!g.itens) return link(g);
+    var ativo = g.itens.some(function (p) { return p.id === current; });
+    return '<details class="nav-grupo"><summary' + (ativo ? ' class="ativo"' : "") + ">" + g.label + "</summary>" +
+      '<div class="nav-menu">' + g.itens.map(link).join("") + "</div></details>";
   }).join("");
 
   var brandInner = BADGE +
-    "<div><h1>Cavalaria de Saint Denis</h1><div class=\"sub\">Livro da Cavalaria · S.D.</div></div>";
+    "<div><h1>Cavalaria</h1><div class=\"sub\">" + (regiao ? "Estado de " + regiao : "Livro da Cavalaria") + "</div></div>";
+
+  // Seletor de região no topo (fora das páginas isoladas, que só mostram o nome).
+  var seletor = isolada ? "<span>" + (regiao || "Denver RP") + "</span>" :
+    '<label class="regiao-topo">Região <select id="regiao-topo"><option value="">Todas</option>' +
+    REGIOES.map(function (r) { return "<option" + (r === regiao ? " selected" : "") + ">" + r + "</option>"; }).join("") + "</select></label>";
 
   var header =
     '<header class="masthead">' +
-    '<div class="edition"><span>Condado de Saint Denis</span><span>Edição Oficial · Anno 1899</span><span>Denver RP</span></div>' +
+    '<div class="edition">' + seletor + "<span>Edição Oficial · Anno 1899</span><span>Denver RP</span></div>" +
     (isolada ? '<div class="brand">' + brandInner + "</div>" : '<a class="brand" href="index.html">' + brandInner + "</a>") +
     '<p class="motto">“Disciplina, preparo e compromisso com o dever.”</p>' +
     "</header>" +
@@ -75,7 +106,7 @@
 
   var footer =
     '<footer class="foot">' +
-    '<div class="seal">Cavalaria de Saint Denis · SD</div>' +
+    '<div class="seal">Cavalaria · ' + (regiao || "Denver RP") + "</div>" +
     "<div>Denver RP · Material de treinamento interno · Uso exclusivo do efetivo</div>" +
     "</footer>";
 
@@ -93,4 +124,22 @@
   document.querySelectorAll("[data-ornament]").forEach(function (el) {
     el.outerHTML = ORNAMENT;
   });
+
+  // Um grupo do menu aberto por vez; clicar fora fecha.
+  var grupos = document.querySelectorAll(".nav-grupo");
+  grupos.forEach(function (g) {
+    g.addEventListener("toggle", function () {
+      if (g.open) grupos.forEach(function (o) { if (o !== g) o.open = false; });
+    });
+  });
+  document.addEventListener("click", function (ev) {
+    if (!ev.target.closest(".nav-grupo")) grupos.forEach(function (g) { g.open = false; });
+  });
+
+  function definirRegiao(r) {
+    try { if (r) localStorage.setItem(CHAVE_REGIAO, r); else localStorage.removeItem(CHAVE_REGIAO); } catch (e) {}
+  }
+  var sel = document.getElementById("regiao-topo");
+  if (sel) sel.addEventListener("change", function () { definirRegiao(this.value); location.reload(); });
+  window.Cavalaria = { regiao: regiao, regioes: REGIOES, definirRegiao: definirRegiao };
 })();

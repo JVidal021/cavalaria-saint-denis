@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Painel do Instrutor · Cavalaria SD</title>
+<title>Painel do Instrutor · Cavalaria</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=padrinho2">
+<link rel="stylesheet" href="css/style.css?v=regioes1">
 </head>
 <!-- Página restrita aos instrutores: sem menu, protegida por senha. -->
 <body data-page="painel" data-isolada>
@@ -23,21 +23,24 @@
   </section>
 
   <form id="entrar" class="cofre">
-    <label for="senha">Senha do instrutor</label>
+    <label for="senha">Código do instrutor</label>
     <div class="cofre-linha">
       <input type="password" id="senha" autocomplete="current-password" required>
       <button type="submit" class="btn-enviar">Entrar</button>
     </div>
     <label class="lembrar"><input type="checkbox" id="lembrar"> Lembrar neste aparelho</label>
+    <p class="cinza">Cada instrutor tem o próprio código, ligado à região que cuida. Peça o seu ao comando.</p>
     <p id="entrar-erro" class="notice" hidden></p>
   </form>
 
   <section id="painel" hidden>
     <div class="painel-topo">
+      <p class="quem" id="quem"></p>
       <div class="telegram" data-label="AGENDA DA PROVA"><p id="agenda"></p></div>
       <p class="painel-acoes">
+        <label class="autor" for="regiao-sel">Região <select id="regiao-sel"></select></label>
         <label class="autor" for="prova-sel">Prova <select id="prova-sel"></select></label>
-        <label class="autor" for="autor">Seu nome <input id="autor" maxlength="40" placeholder="para o registro"></label>
+        <label class="autor" for="autor" id="autor-campo" hidden>Seu nome <input id="autor" maxlength="40" placeholder="para o registro"></label>
         <span id="carga" class="carga" aria-live="polite"></span>
         <button type="button" class="btn-sec" id="atualizar">Atualizar</button>
         <button type="button" class="btn-sec" id="sair">Sair</button>
@@ -45,13 +48,13 @@
     </div>
 
     <nav class="abas" role="tablist" aria-label="Seções do painel">
-      <button type="button" role="tab" class="aba" id="aba-resumo" data-aba="resumo">Resumo</button>
-      <button type="button" role="tab" class="aba" id="aba-oficiais" data-aba="oficiais">Oficiais <span class="contador-aba" id="n-oficiais"></span></button>
       <button type="button" role="tab" class="aba" id="aba-efetivo" data-aba="efetivo">Efetivo <span class="contador-aba" id="n-efetivo"></span></button>
+      <button type="button" role="tab" class="aba" id="aba-resumo" data-aba="resumo">Resumo</button>
+      <button type="button" role="tab" class="aba" id="aba-oficiais" data-aba="oficiais">Provas enviadas <span class="contador-aba" id="n-oficiais"></span></button>
       <button type="button" role="tab" class="aba" id="aba-presenca" data-aba="presenca">Presença <span class="contador-aba" id="n-faltosos"></span></button>
       <button type="button" role="tab" class="aba" id="aba-agenda" data-aba="agenda">Agenda <span class="contador-aba" id="n-agenda"></span></button>
       <button type="button" role="tab" class="aba" id="aba-ausencias" data-aba="ausencias">Ausências <span class="contador-aba" id="n-ausencias"></span></button>
-      <button type="button" role="tab" class="aba" id="aba-registro" data-aba="registro">Registro</button>
+      <button type="button" role="tab" class="aba" id="aba-registro" data-aba="registro">Registro e acesso</button>
     </nav>
 
     <div class="painel-aba" data-painel="resumo">
@@ -127,12 +130,22 @@
         <label>Nome<input name="nome" maxlength="80" required></label>
         <label>ID fixo<input name="id" maxlength="30" required></label>
         <label>Patente<select name="patente" id="efetivo-nova-patente" required></select></label>
+        <label>Região<select name="regiao" id="efetivo-nova-regiao" required></select></label>
         <label class="largo">Observação<input name="obs" maxlength="200"></label>
         <button type="submit" class="btn-sec">Incluir oficial</button>
       </form>
       <div class="filtros">
         <input type="search" id="efetivo-busca" placeholder="Buscar por nome, ID ou patente">
         <select id="efetivo-patente"></select>
+        <select id="efetivo-situacao" aria-label="Situação">
+          <option value="">Todas as situações</option>
+          <option value="pendente">Prova pendente</option>
+          <option value="aprovado">Aprovados</option>
+          <option value="reprovado">Reprovados</option>
+          <option value="sem-prova">Patente sem prova</option>
+          <option value="provisorio">ID provisório</option>
+          <option value="sem-regiao">Sem região</option>
+        </select>
         <button type="button" class="btn-sec" id="copiar-efetivo">Copiar lista</button>
         <button type="button" class="btn-sec" id="copiar-padrinhos-efetivo">Copiar padrinhos</button>
       </div>
@@ -159,9 +172,10 @@
         <div class="recuperacao-corpo">
           <div class="recuperacao-campos">
             <label>Prova<select id="ag-prova"></select></label>
+            <label>Região<select id="ag-regiao"></select></label>
             <label>Início<input type="datetime-local" id="ag-inicio"></label>
             <label>Fim<input type="datetime-local" id="ag-fim"></label>
-            <label class="largo">Somente estes IDs <span class="cinza">(vazio = as patentes da prova, conferidas no Efetivo)</span><textarea id="ag-ids" rows="2"></textarea></label>
+            <label class="largo">Somente estes IDs <span class="cinza">(vazio = as patentes da prova na região, conferidas no Efetivo)</span><textarea id="ag-ids" rows="2"></textarea></label>
             <label class="largo">Observação<input id="ag-obs" maxlength="120" placeholder="Ex.: Promoção a Cabo"></label>
           </div>
           <p class="cinza">Liberar por patente (puxa os IDs do Efetivo):</p>
@@ -193,10 +207,22 @@
     </div>
 
     <div class="painel-aba" data-painel="registro">
-      <p class="presenca-ajuda">As últimas ações feitas pelo painel: divulgação, ausências, correções, avaliações e recuperações. Preencha "Seu nome" no topo para aparecer aqui.</p>
+      <p class="presenca-ajuda">As últimas ações feitas pelo painel, com o nome do instrutor que entrou com o código: divulgação, ausências, correções, avaliações e aplicações.</p>
       <ol class="registro" id="registro"></ol>
-      <details class="recuperacao">
-        <summary>Trocar a senha do painel</summary>
+      <details class="recuperacao" id="instrutores-caixa" hidden>
+        <summary>Instrutores e códigos de acesso</summary>
+        <div class="recuperacao-corpo">
+          <p class="cinza">Cada instrutor entra com o próprio código e só vê e altera a região dele. "Todas as regiões" é para o comando. O código aparece aqui só para quem cuida de todas as regiões.</p>
+          <ul class="instrutores" id="instrutores"></ul>
+          <form id="instrutor-novo" class="recuperacao-campos">
+            <label>Nome<input name="nome" maxlength="60" required></label>
+            <label>Região<select name="regiao" id="instrutor-regiao"></select></label>
+            <p class="recuperacao-botoes"><button type="submit" class="btn-sec">Cadastrar e gerar código</button></p>
+          </form>
+        </div>
+      </details>
+      <details class="recuperacao" id="senha-caixa">
+        <summary>Trocar a senha geral do painel</summary>
         <form class="recuperacao-corpo" id="trocar-senha">
           <div class="recuperacao-campos">
             <label>Senha nova<input type="password" id="senha-nova" minlength="6" autocomplete="new-password" required></label>
@@ -210,9 +236,9 @@
 
 </main>
 </div>
-<script src="js/layout.js"></script>
-<script src="js/prova-data.js?v=patente1"></script>
-<script src="js/agenda.js?v=provas1"></script>
-<script src="js/painel.js?v=patente2"></script>
+<script src="js/prova-data.js?v=regioes1"></script>
+<script src="js/layout.js?v=regioes1"></script>
+<script src="js/agenda.js?v=regioes1"></script>
+<script src="js/painel.js?v=regioes1"></script>
 </body>
 </html>

@@ -17,6 +17,13 @@ window.PROVA = {
   "Cadete",
   "Recruta"
  ],
+ "regioes": [
+  "Lemoyne",
+  "New Hanover",
+  "West Elizabeth",
+  "Ambarino",
+  "New Austin"
+ ],
  "provas": [
   {
    "id": "iniciais",

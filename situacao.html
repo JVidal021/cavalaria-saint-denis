@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minha Situação · Cavalaria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=regioes1">
+</head>
+<body data-page="situacao">
+<div class="sheet">
+<main>
+
+  <section class="hero">
+    <span class="kicker">Ficha do Oficial</span>
+    <h2>Minha Situação</h2>
+    <p class="hero-sub">na Cavalaria</p>
+    <p class="lead">Digite seu ID fixo para ver sua patente, sua região, a sua próxima prova e o resultado das provas já divulgadas.</p>
+    <span data-ornament></span>
+  </section>
+
+  <form id="consultar" class="cofre">
+    <label for="s-id">ID fixo</label>
+    <div class="cofre-linha">
+      <input id="s-id" maxlength="30" inputmode="numeric" autocomplete="off" required>
+      <button type="submit" class="btn-enviar">Consultar</button>
+    </div>
+    <p id="s-erro" class="notice" hidden></p>
+  </form>
+
+  <section id="ficha" class="situacao" hidden></section>
+
+</main>
+</div>
+<script src="js/prova-data.js?v=regioes1"></script>
+<script src="js/layout.js?v=regioes1"></script>
+<script src="js/agenda.js?v=regioes1"></script>
+<script src="js/situacao.js?v=regioes1"></script>
+</body>
+</html>
