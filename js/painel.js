@@ -149,6 +149,7 @@
     c.resultados = (r.resultados || []).filter(minha);
     c.ausencias = (r.ausencias || []).filter(minha);
     c.registro = (r.registro || []).filter(minha);
+    c.cadastros = (r.cadastros || []).filter(minha);
     c.agenda = Object.assign({}, r.agenda, { janelas: (r.agenda.janelas || []).filter(function (j) { return !j.regiao || j.regiao === rv; }) });
     return c;
   }
@@ -203,7 +204,7 @@
         (c.provisorios ? ' <span class="selo-provisorio">' + c.provisorios + " ID provisório</span>" : "") + "</td>" +
         n(c.oficiais) + n(c.aprovados) + n(c.pendentes, true) + n(c.reprovados, true) + n(c.semProva) +
         '<td class="cost">' + (c.media == null ? '<span class="cinza">—</span>' : c.media + "%") + "</td>" +
-        n(c.ausenciasPendentes, true) + n(c.proximas) + "</tr>";
+        n(c.ausenciasPendentes, true) + n(c.cadastrosPendentes, true) + n(c.proximas) + "</tr>";
     }).join("");
   }
 
@@ -340,7 +341,35 @@
     return { tipo: "pendente", html: '<span class="stamp pendente">PENDENTE</span>' +
       (aus ? ' <span class="cinza">ausência ' + esc(aus.situacao.toLowerCase()) + "</span>" : "") + extra };
   }
+  // Pedidos de cadastro: o oficial pede pelo site; o instrutor confere patente e região e aprova (entra no Efetivo) ou recusa.
+  function desenharCadastros() {
+    var todos = dados.cadastros || [];
+    var pendentes = todos.filter(function (c) { return c.situacao === "Pendente"; });
+    var analisados = todos.filter(function (c) { return c.situacao !== "Pendente"; });
+    $("cadastros-caixa").hidden = !todos.length;
+    $("n-efetivo").textContent = ((dados.efetivo || []).length || "") + (pendentes.length ? " · " + pendentes.length + " pedido" + (pendentes.length > 1 ? "s" : "") : "");
+    $("cadastros-ajuda").innerHTML = pendentes.length
+      ? "<strong>" + pendentes.length + "</strong> " + (pendentes.length === 1 ? "pedido aguardando" : "pedidos aguardando") +
+        ". Confira o ID e a patente com o oficial (ou com o Discord) antes de aprovar: aprovado, ele entra no Efetivo e pode fazer a prova da patente."
+      : "Nenhum pedido aguardando.";
+    $("cadastros").innerHTML = pendentes.length ? pendentes.map(function (c) {
+      return '<tr data-linha="' + c.linha + '" data-antes="' + esc(c.id) + '" data-nome="' + esc(c.nome) + '"><td>' + quando(c.quando) + "</td><td><strong>" + esc(c.nome) + "</strong></td>" +
+        "<td>" + esc(c.id) + "</td>" +
+        '<td><select class="cad-patente">' + opcoesPatente(c.patente) + "</select></td>" +
+        '<td><select class="cad-regiao">' + opcoesRegiao(c.regiao) + "</select></td>" +
+        '<td class="cinza">' + esc(c.discord || "—") + '</td><td class="cinza">' + esc(c.origem) + "</td>" +
+        '<td class="cad-botoes"><button type="button" class="btn-sec" data-cadastro="aprovar">Aprovar</button>' +
+        '<button type="button" class="btn-sec perigo" data-cadastro="recusar">Recusar</button></td></tr>';
+    }).join("") : '<tr><td colspan="8" class="cinza">Nenhum pedido aguardando.</td></tr>';
+    $("cadastros-analisados-caixa").hidden = !analisados.length;
+    $("cadastros-analisados").innerHTML = analisados.map(function (c) {
+      return "<li>" + esc(c.patente + " " + c.nome) + " · ID " + esc(c.id) + tagRegiao(c) + ' <span class="stamp ' + (c.situacao === "Aprovado" ? "ok" : "") + '">' +
+        esc(c.situacao.toUpperCase()) + "</span>" + (c.por ? ' <span class="cinza">por ' + esc(c.por) + "</span>" : "") + "</li>";
+    }).join("");
+  }
+
   function desenharEfetivo() {
+    desenharCadastros();
     var efetivo = dados.efetivo || [];
     var busca = chave($("efetivo-busca").value), pat = $("efetivo-patente").value, sit = $("efetivo-situacao").value;
     var opcoes = '<option value="">Todas as patentes</option>' + window.PROVA.patentes.map(function (x) { return "<option>" + esc(x) + "</option>"; }).join("");
@@ -351,7 +380,6 @@
       $("efetivo-nova-regiao").value = (bruto.quem && bruto.quem.regiao) || regiaoVista();
       $("efetivo-nova-regiao").dataset.vista = regiaoVista();
     }
-    $("n-efetivo").textContent = efetivo.length || "";
     var ocultar = $("ocultar-testes").checked;
     var porProva = {};
     dados.provas.forEach(function (x) {
@@ -371,7 +399,7 @@
         .map(function (x) { return "<strong>" + contagem[x[0]] + "</strong> " + (contagem[x[0]] > 1 && x[2] ? x[2] : x[1]); }).join(", ") + "." +
       (provisorios ? ' <span class="selo-alerta">' + provisorios + " com ID provisório</span>" : "") +
       (semRegiao ? ' <span class="selo-alerta">' + semRegiao + " sem região</span>" : "") +
-      (dados.efetivoIncluidos ? " <strong>" + dados.efetivoIncluidos + "</strong> entraram agora, a partir das provas e ausências enviadas." : "") +
+      (dados.cadastrosIncluidos ? " <strong>" + dados.cadastrosIncluidos + "</strong> " + (dados.cadastrosIncluidos === 1 ? "pedido de cadastro novo" : "pedidos de cadastro novos") + ", de quem enviou prova ou ausência sem estar no Efetivo." : "") +
       " Clique no nome para ver o histórico e o padrinho.";
     $("efetivo-cabecalho").innerHTML = "<th>Oficial</th><th>ID</th><th>Patente</th><th>Região</th><th>Prova da patente</th><th>Observação</th><th></th>";
     var lista = efetivo.filter(function (o) {
@@ -1025,6 +1053,20 @@
   });
   ["efetivo-busca", "efetivo-patente", "efetivo-situacao", "presenca-aplicacao"].forEach(function (id) {
     $(id).addEventListener(id === "efetivo-busca" ? "input" : "change", function () { if (dados) desenhar(); });
+  });
+  $("cadastros").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-cadastro]");
+    if (!b) return;
+    var tr = b.closest("tr"), decisao = b.getAttribute("data-cadastro");
+    var patente = tr.querySelector(".cad-patente").value, regiao = tr.querySelector(".cad-regiao").value;
+    var nome = tr.getAttribute("data-nome");
+    if (decisao === "aprovar") {
+      if (!patente || !regiao) { window.alert("Escolha a patente e a região antes de aprovar."); return; }
+      if (!window.confirm("Aprovar " + patente + " " + nome + " (ID " + tr.getAttribute("data-antes") + ") em " + regiao + "? Ele entra no Efetivo.")) return;
+    } else if (!window.confirm("Recusar o pedido de " + nome + "? Ele não entra no Efetivo.")) return;
+    tr.querySelectorAll("button").forEach(function (x) { x.disabled = true; });
+    carregar(lerSenha(), false, undefined, "&cadastro=" + tr.getAttribute("data-linha") + "&decisao=" + decisao +
+      "&antes=" + encodeURIComponent(tr.getAttribute("data-antes")) + "&patente=" + encodeURIComponent(patente) + "&regiao=" + encodeURIComponent(regiao));
   });
   function enviarEfetivo(f, tipo) {
     var v = function (n) { return encodeURIComponent(f.elements[n] ? f.elements[n].value.trim() : ""); };

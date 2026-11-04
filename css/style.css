@@ -1074,3 +1074,10 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
 /* Comparação entre regiões (Resumo do painel) */
 .tabela-comparacao tr.minha-regiao td { background: rgba(169, 124, 47, .18); }
 .tabela-comparacao .alerta-num { color: var(--blood); }
+
+/* Pedidos de cadastro (aba Efetivo do painel) */
+.cadastros { margin-bottom: 1.6rem; padding: .2rem 1rem 1rem; border: 1px dashed var(--rule, #8a6d3b); }
+.tabela-cadastros select { max-width: 11rem; }
+.tabela-cadastros .cad-botoes { white-space: nowrap; }
+.tabela-cadastros .cad-botoes .btn-sec + .btn-sec { margin-left: .4rem; }
+.cadastros-analisados summary { cursor: pointer; margin-top: .8rem; }

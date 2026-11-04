@@ -102,7 +102,9 @@
   // Por que este ID não entra nesta aplicação.
   function motivoRecusa(e) {
     if (e.restrita) return ["Não convocado", "Este ID não está na lista desta aplicação. Confira o número ou procure um instrutor."];
-    if (!e.noEfetivo) return ["ID fora do Efetivo", "Este ID não está no Efetivo. Confira o número ou procure um instrutor."];
+    if (!e.noEfetivo && e.cadastroPendente) return ["Cadastro aguardando aprovação", "O pedido de cadastro deste ID ainda não foi aprovado por um instrutor da sua região. Assim que for aprovado, você pode fazer a prova."];
+    if (!e.noEfetivo) return ["ID fora do Efetivo", "Este ID não está no Efetivo. Confira o número ou " +
+      '<a href="cadastro.html?id=' + encodeURIComponent($("rec-id").value.trim()) + '">peça o seu cadastro</a>; um instrutor da sua região aprova.'];
     var patente = e.patente ? "Sua patente no Efetivo é <strong>" + esc(e.patente) + "</strong>. " : "";
     if (e.suaProva) return ["Prova de outra patente", patente + "Sua prova é a <strong>" + esc(e.suaProva.nome) + "</strong>, não esta. Se a patente estiver errada, procure um instrutor."];
     return ["Sem prova nesta patente", patente + "Ela não tem prova na carreira. Se estiver errada, procure um instrutor."];

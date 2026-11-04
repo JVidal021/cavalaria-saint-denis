@@ -17,7 +17,11 @@
     if (!s.encontrado) {
       $("ficha").hidden = true;
       $("s-erro").hidden = false;
-      $("s-erro").innerHTML = '<span class="label">ID não encontrado</span>Este ID não está no Efetivo. Confira o número ou procure um instrutor da sua região.';
+      $("s-erro").innerHTML = s.pendente
+        ? '<span class="label">Cadastro aguardando aprovação</span>O pedido de cadastro deste ID está com os instrutores' +
+          (s.regiao ? " de <strong>" + esc(s.regiao) + "</strong>" : "") + ". Assim que for aprovado, a sua ficha aparece aqui."
+        : '<span class="label">ID não encontrado</span>Este ID não está no Efetivo. Confira o número ou <a href="cadastro.html?id=' +
+          encodeURIComponent($("s-id").value.trim()) + '">peça o seu cadastro</a>.';
       return;
     }
     $("s-erro").hidden = true;

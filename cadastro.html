@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pedir Cadastro · Cavalaria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=cadastro1">
+</head>
+<body data-page="cadastro">
+<div class="sheet">
+<main>
+
+  <section class="hero">
+    <span class="kicker">Requerimento Oficial</span>
+    <h2>Pedir Cadastro</h2>
+    <p class="hero-sub">no Efetivo da Cavalaria</p>
+    <p class="lead">Só faz prova quem está no Efetivo. Se você entrou agora na Cavalaria ou o seu ID não foi encontrado, peça o cadastro aqui. Um instrutor da sua região confere os dados e aprova.</p>
+    <span data-ornament></span>
+  </section>
+
+  <div class="notice">
+    <span class="label">Como funciona</span>
+    <p>1. Preencha a ficha com o seu ID fixo do jogo. 2. O pedido fica <strong>aguardando aprovação</strong> de um instrutor da região escolhida. 3. Aprovado, você aparece no Efetivo e já pode fazer a prova da sua patente. Acompanhe em <a href="situacao.html">Minha situação</a>.</p>
+  </div>
+
+  <div id="enviada" class="telegram" data-label="TELEGRAMA · PEDIDO RECEBIDO" hidden>
+    <p id="enviada-texto"></p>
+  </div>
+
+  <form id="cadastro" novalidate>
+    <fieldset class="ficha">
+      <legend>Ficha do oficial</legend>
+      <div class="ficha-campos">
+        <div class="ficha-campo"><label for="c-nome">Nome completo do personagem</label><input id="c-nome" maxlength="80" autocomplete="off" required></div>
+        <div class="ficha-campo"><label for="c-id">ID fixo</label><input id="c-id" maxlength="8" inputmode="numeric" autocomplete="off" required></div>
+        <div class="ficha-campo"><label for="c-patente">Patente</label><select id="c-patente" required></select></div>
+        <div class="ficha-campo"><label for="c-regiao">Região</label><select id="c-regiao" required></select></div>
+        <div class="ficha-campo"><label for="c-discord">Discord <span class="opc">(opcional)</span></label><input id="c-discord" maxlength="60" autocomplete="off"></div>
+      </div>
+    </fieldset>
+
+    <div class="enviar-area">
+      <p id="erro" class="notice" hidden></p>
+      <button type="submit" class="btn-enviar" id="btn-enviar">Pedir cadastro</button>
+    </div>
+  </form>
+
+  <p class="pager"><a href="situacao.html">← Minha situação</a><a href="avaliacao.html">Provas e agenda →</a></p>
+
+</main>
+</div>
+<script src="js/prova-data.js?v=cadastro1"></script>
+<script src="js/layout.js?v=cadastro1"></script>
+<script src="js/cadastro.js?v=cadastro1"></script>
+</body>
+</html>

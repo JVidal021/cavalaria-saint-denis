@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=regioes2">
+<link rel="stylesheet" href="css/style.css?v=cadastro1">
 </head>
 <!-- Página restrita aos instrutores: sem menu, protegida por senha. -->
 <body data-page="painel" data-isolada>
@@ -63,7 +63,7 @@
       <div class="table-wrap"><table class="tabela-comparacao">
         <thead><tr><th>Região</th><th style="text-align:right">Oficiais</th><th style="text-align:right">Aprovados</th>
           <th style="text-align:right">Prova pendente</th><th style="text-align:right">Reprovados</th><th style="text-align:right">Sem prova</th>
-          <th style="text-align:right">Média</th><th style="text-align:right">Ausências pendentes</th><th style="text-align:right">Próximas aplicações</th></tr></thead>
+          <th style="text-align:right">Média</th><th style="text-align:right">Ausências pendentes</th><th style="text-align:right">Cadastros pendentes</th><th style="text-align:right">Próximas aplicações</th></tr></thead>
         <tbody id="comparacao"></tbody>
       </table></div>
 
@@ -135,6 +135,18 @@
     </div>
 
     <div class="painel-aba" data-painel="efetivo">
+      <section class="cadastros" id="cadastros-caixa" hidden>
+        <h3 class="section">Pedidos de cadastro</h3>
+        <p class="presenca-ajuda" id="cadastros-ajuda"></p>
+        <div class="table-wrap"><table class="tabela-cadastros">
+          <thead><tr><th>Recebido</th><th>Nome</th><th>ID</th><th>Patente</th><th>Região</th><th>Discord</th><th>Origem</th><th></th></tr></thead>
+          <tbody id="cadastros"></tbody>
+        </table></div>
+        <details class="cadastros-analisados" id="cadastros-analisados-caixa" hidden>
+          <summary>Analisados recentemente</summary>
+          <ul class="situacao-lista" id="cadastros-analisados"></ul>
+        </details>
+      </section>
       <p class="presenca-ajuda" id="efetivo-ajuda"></p>
       <form class="efetivo-novo" id="efetivo-novo">
         <label>Nome<input name="nome" maxlength="80" required></label>
@@ -246,9 +258,9 @@
 
 </main>
 </div>
-<script src="js/prova-data.js?v=regioes2"></script>
-<script src="js/layout.js?v=regioes2"></script>
-<script src="js/agenda.js?v=regioes2"></script>
-<script src="js/painel.js?v=regioes2"></script>
+<script src="js/prova-data.js?v=cadastro1"></script>
+<script src="js/layout.js?v=cadastro1"></script>
+<script src="js/agenda.js?v=cadastro1"></script>
+<script src="js/painel.js?v=cadastro1"></script>
 </body>
 </html>

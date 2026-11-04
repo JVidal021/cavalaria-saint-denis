@@ -18,7 +18,10 @@
       { id: "resultados", href: "resultados.html", label: "Quadro de Honra" },
       { id: "ausencia", href: "ausencia.html", label: "Justificar ausência" }
     ] },
-    { id: "situacao", href: "situacao.html", label: "Minha situação" }
+    { label: "Minha situação", itens: [
+      { id: "situacao", href: "situacao.html", label: "Consultar pelo ID" },
+      { id: "cadastro", href: "cadastro.html", label: "Pedir cadastro" }
+    ] }
   ];
 
   // Região de quem está lendo (escolhida no topo ou em "Minha situação"); muda o nome no cabeçalho.
