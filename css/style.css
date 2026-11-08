@@ -1081,3 +1081,27 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
 .tabela-cadastros .cad-botoes { white-space: nowrap; }
 .tabela-cadastros .cad-botoes .btn-sec + .btn-sec { margin-left: .4rem; }
 .cadastros-analisados summary { cursor: pointer; margin-top: .8rem; }
+
+/* ---------- Regras de Ações ---------- */
+.ficha-acao { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; margin: 12px 0 14px; border: 2px solid var(--ink); outline: 1px solid var(--ink); outline-offset: -6px; background: rgba(255, 248, 228, .45); }
+.ficha-acao > div { padding: 10px 14px; border-right: 1px solid var(--rule); }
+.ficha-acao > div:last-child { border-right: 0; }
+.ficha-acao span { display: block; font-variant: small-caps; letter-spacing: .12em; font-size: .85rem; color: var(--ink-soft); }
+.ficha-acao b { font-family: var(--f-title); font-weight: 400; font-size: 1.1rem; color: var(--blood); line-height: 1.25; }
+.galeria { margin: 10px 0 22px; border: 1px solid var(--rule); background: rgba(255, 248, 228, .35); padding: 10px; }
+.galeria figure { margin: 0 0 10px; }
+.galeria.com-abas figure { margin: 0; }
+.galeria img { display: block; width: 100%; height: auto; border: 1px solid var(--ink); }
+.galeria figcaption { text-align: center; font-style: italic; font-size: .98rem; color: var(--ink-soft); margin-top: 6px; }
+.galeria-abas { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.galeria-abas button { font: inherit; font-variant: small-caps; letter-spacing: .08em; padding: 4px 14px; border: 1px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; }
+.galeria-abas button:hover { background: var(--paper-dark); }
+.galeria-abas button[aria-selected="true"] { background: var(--ink); color: var(--paper-light); }
+.tabela-acoes td:nth-child(2), .tabela-acoes td:nth-child(3), .tabela-acoes td:nth-child(4) { white-space: nowrap; }
+.nota-tabela { font-style: italic; font-size: .98rem; color: var(--ink-soft); margin-top: -8px; }
+@media (max-width: 820px) {
+  .ficha-acao > div { border-right: 0; border-bottom: 1px solid var(--rule); }
+  .ficha-acao > div:last-child { border-bottom: 0; }
+  .tabela-acoes td:nth-child(n) { white-space: normal; }
+}
+@media print { .galeria-abas { display: none; } .galeria figure[hidden] { display: block; } }
