@@ -9,7 +9,8 @@
       { id: "prancheta", href: "prancheta.html", label: "Prancheta" },
       { id: "patrulha", href: "patrulha.html", label: "Patrulha & Abordagem" },
       { id: "lideranca", href: "lideranca.html", label: "Liderança" },
-      { id: "negociacao", href: "negociacao.html", label: "Negociação" }
+      { id: "negociacao", href: "negociacao.html", label: "Negociação" },
+      { id: "acoes", href: "acoes.html", label: "Regras de Ações" }
     ] },
     { id: "consulta", href: "consulta.html", label: "Consulta" },
     { label: "Provas", itens: [
