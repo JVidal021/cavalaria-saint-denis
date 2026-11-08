@@ -35,9 +35,10 @@
     <table>
       <thead><tr><th>Etapa</th><th>Regra</th></tr></thead>
       <tbody>
-        <tr><td>Abertura da ação</td><td>Após iniciar a ação, os bandidos esperam no máximo <strong>20 minutos</strong> pela Cavalaria. Se ninguém chegar, podem se retirar.</td></tr>
-        <tr><td>Chegada da Cavalaria</td><td>Após o primeiro contato, os bandidos esperam até <strong>10 minutos</strong> a mais para o efetivo se formar. Nesse tempo, nenhum deles pode sair do perímetro para buscar apoio ou fazer outra ação.</td></tr>
-        <tr><td>Início</td><td>A ação só começa com todo o efetivo necessário no local. Carroças só podem carregar suprimentos da própria ação.</td></tr>
+        <tr><td>Abertura da ação</td><td>Após puxar o blip, os bandidos esperam <strong>até 20 minutos</strong> pela Cavalaria. Se ela não vier, podem ir embora. O prazo começa quando a ação é puxada; conta como presente o contingente mínimo acordado no chat.</td></tr>
+        <tr><td>Ação iniciada</td><td>A ação está totalmente iniciada no <strong>primeiro tiro</strong> disparado, mesmo para cima. Se a Cavalaria chegou e a ação não estava totalmente iniciada, ela é tratada como <strong>ação de rua</strong>.</td></tr>
+        <tr><td>Chegada da Cavalaria</td><td>Com a Cavalaria no local, os bandidos esperam <strong>+10 minutos</strong> pelo contingente, sem sair do perímetro (nem para apoio, nem para outra ação).</td></tr>
+        <tr><td>Contingente formado</td><td>Começa a <strong>negociação</strong>. Nesse intervalo, a Cavalaria pode usar carroça só para itens essenciais ou banco (roubo); os bandidos aguardam.</td></tr>
       </tbody>
     </table>
   </div>
@@ -98,11 +99,13 @@
         <tr><td>Uso de interiores (saloon, clínica, estábulo etc.)</td><td class="cost">A critério do negociador</td></tr>
         <tr><td>Fuga limpa de 2 minutos</td><td class="cost">2 reféns</td></tr>
         <tr><td>Uso de empunhadura única</td><td class="cost">1 refém</td></tr>
-        <tr><td>Vetar uma arma para os dois lados (ações com armas livres)</td><td class="cost">3 reféns</td></tr>
+        <tr><td>Vetar 1 tipo de arma para os dois lados, como rifle, escopeta, repetidora, pistola ou revólver (ações com armas livres)</td><td class="cost">3 reféns</td></tr>
         <tr><td>Retirada de um oficial</td><td class="cost">3 reféns</td></tr>
       </tbody>
     </table>
   </div>
+
+  <p>Acordo fechado entre Cavalaria e ilegal <strong>vale</strong>: o cumprimento é obrigatório.</p>
 
   <div class="notice">
     <span class="label">Não se deixe enganar</span>
@@ -118,6 +121,9 @@
         <li>Dinheiro pela vida do refém, exceto com aprovação da staff.</li>
         <li>Escolher qual oficial será retirado. Essa escolha é só da Cavalaria, normalmente um voluntário ou o último a chegar.</li>
         <li>Exigir que os oficiais comecem fora de um perímetro já definido.</li>
+        <li>Seringa em ação fechada.</li>
+        <li>Sair do perímetro sem fuga limpa negociada.</li>
+        <li>Remover um modelo específico de arma. Só se veta o tipo (rifle, escopeta, repetidora, pistola, revólver etc.).</li>
       </ul>
     </div>
     <div>
@@ -139,13 +145,12 @@
   </div>
   <ul class="star">
     <li><strong>Efetivo da Cavalaria:</strong> sempre 2 oficiais a mais que o total de bandidos.</li>
-    <li><strong>Checagem de perímetro:</strong> bandidos encontrados do lado de fora devem voltar imediatamente para dentro.</li>
-    <li>Quem fica do lado de fora atua apenas dentro do que foi negociado, sem telhados ou posições ilegais.</li>
+    <li>Quem fica do lado de fora deve saber o que será negociado. Se estiver fora sem sentido, a Cavalaria manda voltar.</li>
     <li>Em caso de quebra, vale a regra do item <a href="#negociavel">3.3</a>.</li>
   </ul>
 
   <div class="telegram" data-label="EXEMPLO · ASSALTO AO BANCO">
-    <p>Assalto ao banco com 3 bandidos (1 do lado de fora). A Cavalaria entra com 5 oficiais. Os bandidos pedem fuga limpa de 2 minutos e entregam 2 reféns.</p>
+    <p>Assalto ao banco com 6 bandidos (2 do lado de fora). A Cavalaria entra com 8 oficiais. Os bandidos pedem fuga limpa de 2 minutos e entregam 2 reféns.</p>
   </div>
 
   <div class="pager"><a href="lideranca.html">← Liderança de Patrulha</a><a href="acoes.html">Regras de Ações →</a></div>
