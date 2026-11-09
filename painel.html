@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Rye&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=acoes1">
+<link rel="stylesheet" href="css/style.css?v=exonerados1">
 </head>
 <!-- Página restrita aos instrutores: sem menu, protegida por senha. -->
 <body data-page="painel" data-isolada>
@@ -177,6 +177,14 @@
           <tbody id="efetivo"></tbody>
         </table>
       </div>
+      <details class="exonerados" id="exonerados-caixa" hidden>
+        <summary>Exonerados <span class="contador-aba" id="n-exonerados"></span></summary>
+        <p class="presenca-ajuda">Quem foi exonerado sai do Efetivo, não faz prova e não consegue pedir cadastro de novo. A ficha fica guardada aqui; se foi engano, use Readmitir.</p>
+        <div class="table-wrap"><table class="tabela-exonerados">
+          <thead><tr><th>Data</th><th>Oficial</th><th>ID</th><th>Região</th><th>Motivo</th><th>Por</th><th></th></tr></thead>
+          <tbody id="exonerados"></tbody>
+        </table></div>
+      </details>
     </div>
 
     <div class="painel-aba" data-painel="presenca">
@@ -258,9 +266,9 @@
 
 </main>
 </div>
-<script src="js/prova-data.js?v=acoes1"></script>
-<script src="js/layout.js?v=acoes1"></script>
-<script src="js/agenda.js?v=acoes1"></script>
-<script src="js/painel.js?v=acoes1"></script>
+<script src="js/prova-data.js?v=exonerados1"></script>
+<script src="js/layout.js?v=exonerados1"></script>
+<script src="js/agenda.js?v=exonerados1"></script>
+<script src="js/painel.js?v=exonerados1"></script>
 </body>
 </html>

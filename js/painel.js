@@ -150,6 +150,7 @@
     c.ausencias = (r.ausencias || []).filter(minha);
     c.registro = (r.registro || []).filter(minha);
     c.cadastros = (r.cadastros || []).filter(minha);
+    c.exonerados = (r.exonerados || []).filter(minha);
     c.agenda = Object.assign({}, r.agenda, { janelas: (r.agenda.janelas || []).filter(function (j) { return !j.regiao || j.regiao === rv; }) });
     return c;
   }
@@ -368,8 +369,24 @@
     }).join("");
   }
 
+  // Exonerados: fora do Efetivo, com a ficha guardada. Readmitir devolve ao Efetivo.
+  function desenharExonerados() {
+    var lista = dados.exonerados || [];
+    var vigentes = lista.filter(function (x) { return x.situacao === "Exonerado"; });
+    $("exonerados-caixa").hidden = !lista.length;
+    $("n-exonerados").textContent = vigentes.length || "";
+    $("exonerados").innerHTML = lista.map(function (x) {
+      var ativo = x.situacao === "Exonerado";
+      return '<tr data-linha="' + x.linha + '" data-antes="' + esc(x.id) + '" data-nome="' + esc(x.nome) + '"' + (ativo ? "" : ' class="cinza"') + ">" +
+        "<td>" + quando(x.quando) + "</td><td><strong>" + esc(x.nome) + "</strong><br><span class=\"cinza\">" + esc(x.patente) + "</span></td>" +
+        "<td>" + esc(x.id) + "</td><td>" + esc(x.regiao || "—") + "</td><td>" + esc(x.motivo) + '</td><td class="cinza">' + esc(x.por) + "</td>" +
+        "<td>" + (ativo ? '<button type="button" class="btn-sec" data-readmitir>Readmitir</button>' : '<span class="cinza">' + esc(x.situacao) + "</span>") + "</td></tr>";
+    }).join("");
+  }
+
   function desenharEfetivo() {
     desenharCadastros();
+    desenharExonerados();
     var efetivo = dados.efetivo || [];
     var busca = chave($("efetivo-busca").value), pat = $("efetivo-patente").value, sit = $("efetivo-situacao").value;
     var opcoes = '<option value="">Todas as patentes</option>' + window.PROVA.patentes.map(function (x) { return "<option>" + esc(x) + "</option>"; }).join("");
@@ -418,7 +435,8 @@
           '<label class="largo">Observação<input name="obs" maxlength="200" value="' + esc(o.obs) + '"></label>' +
           '<span class="corrigir-botoes"><button type="submit" class="btn-sec">Salvar</button>' +
           '<button type="button" class="btn-sec" data-efetivo-cancelar>Cancelar</button>' +
-          '<button type="button" class="btn-sec perigo" data-efetivo-remover>Retirar do Efetivo</button></span></form></td></tr>';
+          '<button type="button" class="btn-sec perigo" data-efetivo-exonerar>Exonerar</button>' +
+          '<button type="button" class="btn-sec perigo" data-efetivo-remover title="Só para cadastro feito por engano; não fica registrado como exoneração">Retirar (cadastro errado)</button></span></form></td></tr>';
       }
       var linha = '<tr class="oficial' + (abertoEfetivo === o.linha ? " aberto" : "") + '" data-efetivo-abrir="' + o.linha + '" tabindex="0"><td><strong>' + esc(o.nome) + "</strong></td>" +
         "<td>" + esc(o.id) + (idProvisorio(o) ? '<span class="selo-provisorio" title="Troque pelo ID fixo do oficial">provisório</span>' : "") + "</td>" +
@@ -1054,6 +1072,14 @@
   ["efetivo-busca", "efetivo-patente", "efetivo-situacao", "presenca-aplicacao"].forEach(function (id) {
     $(id).addEventListener(id === "efetivo-busca" ? "input" : "change", function () { if (dados) desenhar(); });
   });
+  $("exonerados").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-readmitir]");
+    if (!b) return;
+    var tr = b.closest("tr");
+    if (!window.confirm("Readmitir " + tr.getAttribute("data-nome") + "? Ele volta ao Efetivo com a mesma patente e região.")) return;
+    b.disabled = true;
+    carregar(lerSenha(), false, undefined, "&readmitir=" + tr.getAttribute("data-linha") + "&antes=" + encodeURIComponent(tr.getAttribute("data-antes")));
+  });
   $("cadastros").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-cadastro]");
     if (!b) return;
@@ -1088,10 +1114,21 @@
       return;
     }
     if (ev.target.closest("[data-efetivo-cancelar]")) { editandoEfetivo = null; desenharEfetivo(); return; }
+    var ex = ev.target.closest("[data-efetivo-exonerar]");
+    if (ex) {
+      var fe = ex.closest("form");
+      var motivo = window.prompt("Motivo da exoneração de " + fe.getAttribute("data-antes") + " (fica na ficha e no Registro):", "");
+      if (motivo == null) return;
+      if (motivo.trim().length < 3) { window.alert("Escreva o motivo da exoneração."); return; }
+      editandoEfetivo = null;
+      carregar(lerSenha(), false, undefined, "&exonerar=" + fe.getAttribute("data-linha") + "&antes=" + encodeURIComponent(fe.getAttribute("data-antes")) +
+        "&motivo=" + encodeURIComponent(motivo.trim()));
+      return;
+    }
     var r = ev.target.closest("[data-efetivo-remover]");
     if (r) {
       var f = r.closest("form");
-      if (!window.confirm("Retirar " + f.getAttribute("data-antes") + " do Efetivo? As provas dele continuam guardadas.")) return;
+      if (!window.confirm("Retirar " + f.getAttribute("data-antes") + " do Efetivo por cadastro errado? Isso não conta como exoneração; para desligar o oficial, use Exonerar.")) return;
       editandoEfetivo = null;
       carregar(lerSenha(), false, undefined, "&efetivo=remover&linha=" + f.getAttribute("data-linha") + "&antes=" + encodeURIComponent(f.getAttribute("data-antes")));
     }

@@ -1105,3 +1105,8 @@ a.btn-enviar.bloqueado { filter: grayscale(.85) brightness(.9); cursor: not-allo
   .tabela-acoes td:nth-child(n) { white-space: normal; }
 }
 @media print { .galeria-abas { display: none; } .galeria figure[hidden] { display: block; } }
+
+/* Exonerados (aba Efetivo do painel) */
+.exonerados { margin-top: 1.6rem; }
+.exonerados summary { cursor: pointer; font-weight: bold; }
+.tabela-exonerados tr.cinza td { opacity: .65; }

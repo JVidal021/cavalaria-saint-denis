@@ -17,7 +17,10 @@
     if (!s.encontrado) {
       $("ficha").hidden = true;
       $("s-erro").hidden = false;
-      $("s-erro").innerHTML = s.pendente
+      $("s-erro").innerHTML = s.exonerado
+        ? '<span class="label">Exonerado</span>Este ID foi exonerado da Cavalaria' + (s.quando ? " em " + data(s.quando) : "") +
+          ". Se acha que é engano, procure um instrutor" + (s.regiao ? " de <strong>" + esc(s.regiao) + "</strong>" : " da sua região") + "."
+        : s.pendente
         ? '<span class="label">Cadastro aguardando aprovação</span>O pedido de cadastro deste ID está com os instrutores' +
           (s.regiao ? " de <strong>" + esc(s.regiao) + "</strong>" : "") + ". Assim que for aprovado, a sua ficha aparece aqui."
         : '<span class="label">ID não encontrado</span>Este ID não está no Efetivo. Confira o número ou <a href="cadastro.html?id=' +
